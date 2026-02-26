@@ -1,18 +1,17 @@
-local allowed_values = {"deconstruction-planner"}
-local default_filter_item = "deconstruction-planner"
+local setting = {
+  type = "string-setting",
+  name = "auto-splitter-block-filter-item",
+  setting_type = "startup",
+  default_value = "deconstruction-planner",
+  allowed_values = {"deconstruction-planner"},
+  order = "a",
+}
 
 if mods["atan-null"] then
-  table.insert(allowed_values, "atan-null")
-  default_filter_item = "atan-null"
+  table.insert(setting.allowed_values, "atan-null")
+  setting.default_value = "atan-null"
 end
 
-data:extend({
-  {
-    type = "string-setting",
-    name = "auto-splitter-block-filter-item",
-    setting_type = "startup",
-    default_value = default_filter_item,
-    allowed_values = allowed_values,
-    order = "a",
-  }
-})
+setting.hidden = #setting.allowed_values <= 1
+
+data:extend({setting})
