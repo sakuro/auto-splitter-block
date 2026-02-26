@@ -11,9 +11,9 @@ local function on_splitter_placed(splitter)
   local has_left = splitter_utils.has_compatible_entity_at(surface, left_pos, dir)
   local has_right = splitter_utils.has_compatible_entity_at(surface, right_pos, dir)
 
-  if has_left and not has_right then
+  if has_left and not has_right and not splitter.splitter_filter then
     splitter_utils.set_block_filter(splitter, "right")
-  elseif has_right and not has_left then
+  elseif has_right and not has_left and not splitter.splitter_filter then
     splitter_utils.set_block_filter(splitter, "left")
   end
 end
@@ -29,11 +29,11 @@ local function on_transport_placed(entity)
       local has_left = splitter_utils.has_compatible_entity_at(surface, left_pos, dir)
       local has_right = splitter_utils.has_compatible_entity_at(surface, right_pos, dir)
 
-      if has_left and has_right and splitter.splitter_filter then
+      if has_left and has_right and splitter_utils.has_block_filter(splitter) then
         splitter_utils.clear_block_filter(splitter)
-      elseif has_left and not has_right then
+      elseif has_left and not has_right and not splitter.splitter_filter then
         splitter_utils.set_block_filter(splitter, "right")
-      elseif has_right and not has_left then
+      elseif has_right and not has_left and not splitter.splitter_filter then
         splitter_utils.set_block_filter(splitter, "left")
       end
     end
@@ -52,7 +52,9 @@ local function on_transport_removed(entity)
       local has_right = splitter_utils.has_compatible_entity_at(surface, right_pos, dir, entity)
 
       if not has_left and not has_right then
-        splitter_utils.clear_block_filter(splitter)
+        if splitter_utils.has_block_filter(splitter) then
+          splitter_utils.clear_block_filter(splitter)
+        end
       elseif has_left and not has_right and not splitter.splitter_filter then
         splitter_utils.set_block_filter(splitter, "right")
       elseif has_right and not has_left and not splitter.splitter_filter then
