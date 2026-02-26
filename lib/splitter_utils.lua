@@ -85,6 +85,13 @@ function splitter_utils.find_affecting_splitters(entity)
   return result
 end
 
+function splitter_utils.has_block_filter(splitter)
+  local filter = splitter.splitter_filter
+  if not filter then return false end
+  local name = type(filter) == "string" and filter or filter.name
+  return name == BLOCK_FILTER
+end
+
 function splitter_utils.set_block_filter(splitter, side)
   splitter.splitter_filter = BLOCK_FILTER
   splitter.splitter_output_priority = side
