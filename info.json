@@ -3,9 +3,11 @@
   "version": "0.0.1",
   "title": "Auto Splitter Block",
   "author": "sakuro",
-  "description": "Auto Splitter Block",
+  "description": "Automatically sets splitter output filters to block the unused side",
   "factorio_version": "2.0",
   "dependencies": [
-    "base >= 2.0"
+    "base >= 2.0",
+    "(?) space-age",
+    "(?) atan-null"
   ]
 }
