@@ -66,7 +66,8 @@ local function on_entity_built(event)
   local entity = event.entity
   if entity.type == "splitter" then
     on_splitter_placed(entity)
-  elseif entity_utils.is_transport_entity(entity) then
+  end
+  if entity_utils.is_transport_entity(entity) then
     on_transport_placed(entity)
   end
 end

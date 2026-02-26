@@ -46,18 +46,40 @@ function splitter_utils.has_compatible_entity_at(surface, position, splitter_dir
   return false
 end
 
--- Find splitters whose output positions include the given entity's position
+-- Get tile center positions occupied by an entity.
+-- 1x1 entities: single position. 2x1 entities (splitter, loader): two positions.
+local function get_tile_positions(entity)
+  local pos = entity.position
+  local etype = entity.type
+  if etype == "splitter" or etype == "loader" then
+    local dir = entity.direction
+    if dir == defines.direction.north or dir == defines.direction.south then
+      return {{x = pos.x - 0.5, y = pos.y}, {x = pos.x + 0.5, y = pos.y}}
+    else
+      return {{x = pos.x, y = pos.y - 0.5}, {x = pos.x, y = pos.y + 0.5}}
+    end
+  end
+  return {{x = pos.x, y = pos.y}}
+end
+
+-- Find splitters whose output positions overlap with any tile the entity occupies
 function splitter_utils.find_affecting_splitters(entity)
   local pos = entity.position
+  local tile_positions = get_tile_positions(entity)
   local splitters = entity.surface.find_entities_filtered{
     type = "splitter",
     area = {{pos.x - 2, pos.y - 2}, {pos.x + 2, pos.y + 2}},
   }
   local result = {}
   for _, splitter in ipairs(splitters) do
-    local left_pos, right_pos = splitter_utils.get_output_positions(splitter)
-    if positions_match(pos, left_pos) or positions_match(pos, right_pos) then
-      result[#result + 1] = splitter
+    if splitter ~= entity then
+      local left_pos, right_pos = splitter_utils.get_output_positions(splitter)
+      for _, tile_pos in ipairs(tile_positions) do
+        if positions_match(tile_pos, left_pos) or positions_match(tile_pos, right_pos) then
+          result[#result + 1] = splitter
+          break
+        end
+      end
     end
   end
   return result
