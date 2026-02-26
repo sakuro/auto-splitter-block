@@ -1,0 +1,11 @@
+{
+  "name": "auto-splitter-block",
+  "version": "0.0.1",
+  "title": "Auto Splitter Block",
+  "author": "sakuro",
+  "description": "Auto Splitter Block",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base >= 2.0"
+  ]
+}
