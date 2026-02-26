@@ -90,7 +90,7 @@ jobs:
         gh release create "${{ steps.version.outputs.tag }}" \
           --title "${{ env.MOD_NAME }} ${{ steps.version.outputs.tag }}" \
           --notes "${{ steps.changelog.outputs.content }}" \
-          "$ARCHIVE_NAME"
+          "dist/$ARCHIVE_NAME"
 
     - name: Post-release summary
       run: |
