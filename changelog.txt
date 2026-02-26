@@ -3,6 +3,6 @@ Version: Unreleased
   Features:
     - Initial release
     - Automatically block unused splitter output side with a filter item
-    - Splitters connected to circuit networks are left untouched
+    - Splitters with user-configured filters or connected to circuit networks are left untouched
     - Configurable block filter item (default: deconstruction planner)
     - Use Null item as default filter when Null Item MOD (atan-null) is installed

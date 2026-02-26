@@ -7,7 +7,7 @@ A Factorio 2.0 MOD that automatically sets splitter output filters to block the 
 - When a splitter has a transport entity on only one output side, the other side is automatically blocked using an output filter.
 - The filter is cleared when both outputs become occupied or both become empty.
 - Responds to placement and removal by players, robots, and space platforms.
-- Splitters connected to circuit networks are left untouched.
+- Splitters with user-configured filters or connected to circuit networks are left untouched.
 
 ## Block Filter Item
 
