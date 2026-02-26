@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
-Version: Unreleased
+Version: 0.5.0
+Date: 2026-02-26
   Features:
     - Initial release
     - Automatically block unused splitter output side with a filter item
