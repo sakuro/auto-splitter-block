@@ -64,6 +64,31 @@ local function on_transport_removed(entity)
   end
 end
 
+local function on_splitter_orientation_changed(event)
+  local splitter = event.entity
+  if splitter.type ~= "splitter" then return end
+  if splitter_utils.is_circuit_controlled(splitter) then return end
+
+  if splitter_utils.has_block_filter(splitter) then
+    splitter_utils.clear_block_filter(splitter)
+  elseif splitter.splitter_filter then
+    return
+  end
+
+  local surface = splitter.surface
+  local dir = splitter.direction
+  local left_pos, right_pos = splitter_utils.get_output_positions(splitter)
+
+  local has_left = splitter_utils.has_compatible_entity_at(surface, left_pos, dir)
+  local has_right = splitter_utils.has_compatible_entity_at(surface, right_pos, dir)
+
+  if has_left and not has_right then
+    splitter_utils.set_block_filter(splitter, "right")
+  elseif has_right and not has_left then
+    splitter_utils.set_block_filter(splitter, "left")
+  end
+end
+
 local function is_automated_build_enabled()
   return settings.global["auto-splitter-block-enable-for-automated-builds"].value
 end
@@ -110,3 +135,6 @@ script.on_event(defines.events.on_space_platform_built_entity, on_entity_built_a
 script.on_event(defines.events.on_player_mined_entity, on_entity_removed, ENTITY_FILTER)
 script.on_event(defines.events.on_robot_mined_entity, on_entity_removed_automated, ENTITY_FILTER)
 script.on_event(defines.events.on_space_platform_mined_entity, on_entity_removed_automated, ENTITY_FILTER)
+
+script.on_event(defines.events.on_player_rotated_entity, on_splitter_orientation_changed)
+script.on_event(defines.events.on_player_flipped_entity, on_splitter_orientation_changed)
