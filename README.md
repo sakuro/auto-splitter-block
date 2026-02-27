@@ -13,10 +13,10 @@ A Factorio 2.0 MOD that automatically sets splitter output filters to block the 
 
 The item used for blocking is configurable in MOD settings (startup). Default: No item.
 
-Additional options with optional mods:
+Additional options with optional MODs:
 
 - [Null Item](https://mods.factorio.com/mod/atan-null)
-- [Null](https://mods.factorio.com/mod/null) (listed as "Null Item/Entity" on the mod portal)
+- [Null](https://mods.factorio.com/mod/null) (listed as "Null Item/Entity" on the MOD portal)
 
 ## Compatible Transport Entities
 
