@@ -31,9 +31,8 @@ local function on_entity_orientation_changed(event)
     if not splitter_utils.is_circuit_controlled(entity) then
       if splitter_utils.has_block_filter(entity) then
         splitter_utils.clear_block_filter(entity)
-      elseif not entity.splitter_filter then
-        splitter_utils.update_block_filter(entity)
       end
+      splitter_utils.update_block_filter(entity)
     end
   end
 
