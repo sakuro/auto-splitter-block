@@ -12,4 +12,13 @@ if mods["atan-null"] then
   setting.default_value = "atan-null"
 end
 
-data:extend({setting})
+data:extend({
+  setting,
+  {
+    type = "bool-setting",
+    name = "auto-splitter-block-enable-for-automated-builds",
+    setting_type = "runtime-global",
+    default_value = false,
+    order = "b",
+  },
+})

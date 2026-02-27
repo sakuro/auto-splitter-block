@@ -3,6 +3,10 @@ Version: Unreleased
   Changes:
     - Use no-item as default block filter item for cleaner appearance
     - Setting is now always visible in MOD settings
+  Bugfixes:
+    - Disable auto-blocking for robot and space platform builds by default to prevent overwriting blueprint-configured splitter filters
+  Features:
+    - Add runtime setting to enable auto-blocking for robot and space platform builds
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.0
 Date: 2026-02-26
