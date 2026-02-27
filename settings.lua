@@ -9,7 +9,10 @@ local setting = {
 
 if mods["atan-null"] then
   table.insert(setting.allowed_values, "atan-null")
-  setting.default_value = "atan-null"
+end
+
+if mods["null"] then
+  table.insert(setting.allowed_values, "null")
 end
 
 data:extend({
