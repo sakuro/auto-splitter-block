@@ -64,6 +64,10 @@ local function on_transport_removed(entity)
   end
 end
 
+local function is_automated_build_enabled()
+  return settings.global["auto-splitter-block-enable-for-automated-builds"].value
+end
+
 local function on_entity_built(event)
   local entity = event.entity
   if entity.type == "splitter" then
@@ -74,11 +78,21 @@ local function on_entity_built(event)
   end
 end
 
+local function on_entity_built_automated(event)
+  if not is_automated_build_enabled() then return end
+  on_entity_built(event)
+end
+
 local function on_entity_removed(event)
   local entity = event.entity
   if entity_utils.is_transport_entity(entity) then
     on_transport_removed(entity)
   end
+end
+
+local function on_entity_removed_automated(event)
+  if not is_automated_build_enabled() then return end
+  on_entity_removed(event)
 end
 
 local ENTITY_FILTER = {
@@ -90,9 +104,9 @@ local ENTITY_FILTER = {
 }
 
 script.on_event(defines.events.on_built_entity, on_entity_built, ENTITY_FILTER)
-script.on_event(defines.events.on_robot_built_entity, on_entity_built, ENTITY_FILTER)
-script.on_event(defines.events.on_space_platform_built_entity, on_entity_built, ENTITY_FILTER)
+script.on_event(defines.events.on_robot_built_entity, on_entity_built_automated, ENTITY_FILTER)
+script.on_event(defines.events.on_space_platform_built_entity, on_entity_built_automated, ENTITY_FILTER)
 
 script.on_event(defines.events.on_player_mined_entity, on_entity_removed, ENTITY_FILTER)
-script.on_event(defines.events.on_robot_mined_entity, on_entity_removed, ENTITY_FILTER)
-script.on_event(defines.events.on_space_platform_mined_entity, on_entity_removed, ENTITY_FILTER)
+script.on_event(defines.events.on_robot_mined_entity, on_entity_removed_automated, ENTITY_FILTER)
+script.on_event(defines.events.on_space_platform_mined_entity, on_entity_removed_automated, ENTITY_FILTER)
