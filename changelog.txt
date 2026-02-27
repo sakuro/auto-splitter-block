@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: Unreleased
+  Changes:
+    - Use no-item as default block filter item for cleaner appearance
+    - Setting is now always visible in MOD settings
+---------------------------------------------------------------------------------------------------
 Version: 0.5.0
 Date: 2026-02-26
   Features:
