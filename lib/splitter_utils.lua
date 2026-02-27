@@ -85,6 +85,23 @@ function splitter_utils.find_affecting_splitters(entity)
   return result
 end
 
+function splitter_utils.update_block_filter(splitter, exclude_entity)
+  local surface = splitter.surface
+  local dir = splitter.direction
+  local left_pos, right_pos = splitter_utils.get_output_positions(splitter)
+
+  local has_left = splitter_utils.has_compatible_entity_at(surface, left_pos, dir, exclude_entity)
+  local has_right = splitter_utils.has_compatible_entity_at(surface, right_pos, dir, exclude_entity)
+
+  if has_left == has_right and splitter_utils.has_block_filter(splitter) then
+    splitter_utils.clear_block_filter(splitter)
+  elseif has_left and not has_right and not splitter.splitter_filter then
+    splitter_utils.set_block_filter(splitter, "right")
+  elseif has_right and not has_left and not splitter.splitter_filter then
+    splitter_utils.set_block_filter(splitter, "left")
+  end
+end
+
 function splitter_utils.has_block_filter(splitter)
   local filter = splitter.splitter_filter
   if not filter then return false end
