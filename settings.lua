@@ -1,22 +1,22 @@
-local setting = {
-  type = "string-setting",
-  name = "auto-splitter-block-filter-item",
-  setting_type = "startup",
-  default_value = "no-item",
-  allowed_values = {"no-item", "deconstruction-planner"},
-  order = "a",
-}
+local filter_item_allowed_values = {"no-item", "deconstruction-planner"}
 
 if mods["atan-null"] then
-  table.insert(setting.allowed_values, "atan-null")
+  table.insert(filter_item_allowed_values, "atan-null")
 end
 
 if mods["null"] then
-  table.insert(setting.allowed_values, "null")
+  table.insert(filter_item_allowed_values, "null")
 end
 
 data:extend({
-  setting,
+  {
+    type = "string-setting",
+    name = "auto-splitter-block-filter-item",
+    setting_type = "startup",
+    default_value = "no-item",
+    allowed_values = filter_item_allowed_values,
+    order = "a",
+  },
   {
     type = "bool-setting",
     name = "auto-splitter-block-enable-for-automated-builds",
