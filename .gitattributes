@@ -1,7 +1,9 @@
 /.gitattributes export-ignore
 /.github/ export-ignore
 /.gitignore export-ignore
+/.gitmodules export-ignore
 /bin/ export-ignore
+/references/ export-ignore
 /doc/ export-ignore
 /AGENTS.md export-ignore
 /CLAUDE.md export-ignore

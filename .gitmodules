@@ -1,0 +1,6 @@
+[submodule "references/factorio-data"]
+	path = references/factorio-data
+	url = https://github.com/wube/factorio-data
+[submodule "references/factorio-lua-api"]
+	path = references/factorio-lua-api
+	url = https://github.com/wube/factorio-data
