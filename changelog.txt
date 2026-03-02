@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------------------------------------
+Version: Unreleased
+  Bugfixes:
+    - Fix underground belt outputs being incorrectly recognized as compatible splitter outputs
+---------------------------------------------------------------------------------------------------
 Version: 0.6.1
 Date: 2026-02-28
   Graphics:

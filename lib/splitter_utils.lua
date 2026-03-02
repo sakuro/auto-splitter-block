@@ -36,7 +36,7 @@ local function has_compatible_entity_at(surface, position, splitter_dir, exclude
   }
   for _, entity in ipairs(entities) do
     if entity ~= exclude_entity and
-       entity_utils.is_output_compatible(entity.type, entity.direction, splitter_dir) then
+       entity_utils.is_output_compatible(entity, splitter_dir) then
       return true
     end
   end

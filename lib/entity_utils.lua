@@ -9,13 +9,20 @@ local function is_transport_entity(entity)
   return ALL_TRANSPORT_TYPES[entity.type] or false
 end
 
--- Belts/underground belts: any direction except opposite (facing back into splitter)
+-- Transport belts/underground belt inputs: any direction except opposite (facing back into splitter)
+-- Underground belt outputs: side-loading (perpendicular) is compatible, but same direction as splitter is not
 -- Splitters/loaders: same direction only
-local function is_output_compatible(entity_type, entity_dir, splitter_dir)
-  if BELT_TYPES[entity_type] then
-    return (entity_dir + 8) % 16 ~= splitter_dir
+local function is_output_compatible(entity, splitter_dir)
+  local entity_type = entity.type
+  if entity_type == "underground-belt" then
+    if entity.belt_to_ground_type == "output" and entity.direction == splitter_dir then
+      return false
+    end
+    return (entity.direction + 8) % 16 ~= splitter_dir
+  elseif BELT_TYPES[entity_type] then
+    return (entity.direction + 8) % 16 ~= splitter_dir
   elseif STRICT_TYPES[entity_type] then
-    return entity_dir == splitter_dir
+    return entity.direction == splitter_dir
   end
   return false
 end
