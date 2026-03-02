@@ -14,12 +14,12 @@ end
 -- Splitters/loaders: same direction only
 local function is_output_compatible(entity, splitter_dir)
   local entity_type = entity.type
-  if entity_type == "underground-belt" then
-    if entity.belt_to_ground_type == "output" and entity.direction == splitter_dir then
+  if BELT_TYPES[entity_type] then
+    if entity_type == "underground-belt"
+       and entity.belt_to_ground_type == "output"
+       and entity.direction == splitter_dir then
       return false
     end
-    return (entity.direction + 8) % 16 ~= splitter_dir
-  elseif BELT_TYPES[entity_type] then
     return (entity.direction + 8) % 16 ~= splitter_dir
   elseif STRICT_TYPES[entity_type] then
     return entity.direction == splitter_dir
