@@ -22,7 +22,7 @@ Additional options with optional MODs:
 ## Compatible Transport Entities
 
 - Transport belts (same direction or sideloading, but not opposite)
-- Underground belts (same rules as transport belts)
+- Underground belts (inputs: same rules as transport belts; outputs: sideloading only)
 - Splitters (same direction only)
 - Loaders (same direction only)
 
