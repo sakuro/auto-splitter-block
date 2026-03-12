@@ -52,8 +52,6 @@ local function on_entity_built(event)
   end
   if entity_utils.is_transport_entity(entity) then
     on_transport_placed(entity)
-  end
-  if entity.type == "splitter" then
     for _, splitter in ipairs(splitter_utils.find_affecting_splitters(entity)) do
       splitter_utils.forget_splitter(splitter)
     end
