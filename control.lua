@@ -62,6 +62,9 @@ end
 
 local function on_entity_removed(event)
   local entity = event.entity
+  if entity.type == "splitter" then
+    splitter_utils.forget_splitter(entity)
+  end
   if entity_utils.is_transport_entity(entity) then
     on_transport_removed(entity)
   end
@@ -79,6 +82,17 @@ local ENTITY_FILTER = {
   {filter = "type", type = "loader"},
   {filter = "type", type = "loader-1x1"},
 }
+
+local function on_init()
+  storage.splitter_original_priority = {}
+end
+
+local function on_configuration_changed()
+  storage.splitter_original_priority = storage.splitter_original_priority or {}
+end
+
+script.on_init(on_init)
+script.on_configuration_changed(on_configuration_changed)
 
 script.on_event(defines.events.on_built_entity, on_entity_built, ENTITY_FILTER)
 script.on_event(defines.events.on_robot_built_entity, on_entity_built_automated, ENTITY_FILTER)

@@ -88,13 +88,29 @@ local function has_block_filter(splitter)
 end
 
 local function set_block_filter(splitter, side)
+  -- Preserve pre-MOD priority so it can be restored when the filter is cleared.
+  -- "none" is skipped since clear_block_filter defaults to "none" without a saved entry.
+  local priority = splitter.splitter_output_priority
+  if priority ~= "none" and storage.splitter_original_priority[splitter.unit_number] == nil then
+    storage.splitter_original_priority[splitter.unit_number] = priority
+  end
   splitter.splitter_filter = BLOCK_FILTER
   splitter.splitter_output_priority = side
 end
 
 local function clear_block_filter(splitter)
   splitter.splitter_filter = nil
-  splitter.splitter_output_priority = "none"
+  local original = storage.splitter_original_priority[splitter.unit_number]
+  if original then
+    splitter.splitter_output_priority = original
+    storage.splitter_original_priority[splitter.unit_number] = nil
+  else
+    splitter.splitter_output_priority = "none"
+  end
+end
+
+local function forget_splitter(splitter)
+  storage.splitter_original_priority[splitter.unit_number] = nil
 end
 
 local function update_block_filter(splitter, exclude_entity)
@@ -120,4 +136,5 @@ return {
   has_block_filter = has_block_filter,
   clear_block_filter = clear_block_filter,
   update_block_filter = update_block_filter,
+  forget_splitter = forget_splitter,
 }
