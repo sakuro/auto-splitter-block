@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------------------------------------
+Version: Unreleased
+  Bugfixes:
+    - Preserve user-set splitter output priority when nearby entities are fast-replaced
+---------------------------------------------------------------------------------------------------
 Version: 0.6.2
 Date: 2026-03-02
   Bugfixes:
