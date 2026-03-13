@@ -88,13 +88,29 @@ local function has_block_filter(splitter)
 end
 
 local function set_block_filter(splitter, side)
+  local id = splitter.unit_number
+  if not storage.saved_priorities[id] then
+    storage.saved_priorities[id] = {
+      priority = splitter.splitter_output_priority,
+      tick = game.tick,
+    }
+  end
   splitter.splitter_filter = BLOCK_FILTER
   splitter.splitter_output_priority = side
 end
 
 local function clear_block_filter(splitter)
+  local id = splitter.unit_number
+  local saved = storage.saved_priorities[id]
+  local restored_priority = "none"
+  if saved then
+    if saved.tick == game.tick then
+      restored_priority = saved.priority
+    end
+    storage.saved_priorities[id] = nil
+  end
   splitter.splitter_filter = nil
-  splitter.splitter_output_priority = "none"
+  splitter.splitter_output_priority = restored_priority
 end
 
 local function update_block_filter(splitter, exclude_entity)

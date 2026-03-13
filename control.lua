@@ -1,6 +1,16 @@
 local splitter_utils = require("lib.splitter_utils")
 local entity_utils = require("lib.entity_utils")
 
+script.on_init(function()
+  storage.saved_priorities = {}
+end)
+
+script.on_configuration_changed(function()
+  if not storage.saved_priorities then
+    storage.saved_priorities = {}
+  end
+end)
+
 local function on_splitter_placed(splitter)
   if splitter_utils.is_circuit_controlled(splitter) then return end
   splitter_utils.update_block_filter(splitter)
