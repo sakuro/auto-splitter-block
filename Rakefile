@@ -49,7 +49,7 @@ namespace :release do
 
     sh("bin/factorix", "mod", "edit", mod_name,
       "--summary", info["description"],
-      "--tags", mod_tags.join(","))
+      *mod_tags.empty? ? [] : ["--tags", mod_tags.join(",")])
   end
 
   desc "Create GitHub Release"

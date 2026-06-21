@@ -61,12 +61,10 @@ jobs:
     - name: Check if git tag already exists
       run: |
         if git tag | grep -q "^${{ steps.version.outputs.tag }}$"; then
-          if [ "${{ github.event.action }}" != "synchronize" ]; then
-            echo "❌ Error: Git tag ${{ steps.version.outputs.tag }} already exists"
-            echo "This should only happen if the tag was created outside the release process"
-            exit 1
-          else
+          if [ "${{ github.event.action }}" == "synchronize" ]; then
             echo "Tag ${{ steps.version.outputs.tag }} exists and will be updated to latest commit"
+          else
+            echo "Tag ${{ steps.version.outputs.tag }} already exists (created by release-preparation)"
           fi
         fi
 

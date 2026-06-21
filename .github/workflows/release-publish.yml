@@ -65,8 +65,26 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: bundle exec rake release:github
 
+    - name: Checkout main branch
+      run: git checkout main
+
+    - name: Add Unreleased section to changelog.txt
+      run: |
+        { printf -- '-%.0s' {1..99}; printf '\nVersion: Unreleased\n'; cat changelog.txt; } > changelog.txt.tmp
+        mv changelog.txt.tmp changelog.txt
+
+    - name: Verify changelog.txt format
+      run: bundle exec factorix mod changelog check
+
+    - name: Commit and push changelog update
+      run: |
+        git add changelog.txt
+        git commit -m ":memo: Start Unreleased section for next release"
+        git push origin main
+
     - name: Post-release summary
       run: |
         echo "🎉 Release ${{ steps.version.outputs.tag }} published successfully!"
         echo "- MOD built from tagged commit and published to Factorio MOD portal"
         echo "- GitHub release created with changelog and assets"
+        echo "- Unreleased section added to changelog.txt on main"
