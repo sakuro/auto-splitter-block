@@ -1,5 +1,11 @@
 [tools]
 ruby = "4.0"
+gh = "latest"
+actionlint = "latest"
+shellcheck = "latest"
+
+[settings]
+minimum_release_age = "3d"
 
 [env]
 _.path = ["bin"]
