@@ -1,6 +1,6 @@
 # Auto Splitter Block
 
-A Factorio 2.0 MOD that automatically sets splitter output filters to block the unused side when only one output has a compatible transport entity.
+A Factorio MOD that automatically sets splitter output filters to block the unused side when only one output has a compatible transport entity.
 
 ## Features
 
