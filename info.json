@@ -1,6 +1,6 @@
 {
   "name": "auto-splitter-block",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "title": "Auto Splitter Block",
   "author": "sakuro",
   "description": "Automatically sets splitter output filters to block the unused side",
