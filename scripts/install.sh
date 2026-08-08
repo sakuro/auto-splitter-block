@@ -6,4 +6,3 @@ mod_version=$(jq -r .version info.json)
 archive="dist/${mod_name}_${mod_version}.zip"
 mod_dir=$(factorix path --json | jq -r .mod_dir)
 cp "$archive" "$mod_dir"
-factorix mod enable "$mod_name"
