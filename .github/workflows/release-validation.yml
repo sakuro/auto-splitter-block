@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       with:
         fetch-depth: 0
 
@@ -104,17 +104,15 @@ jobs:
           exit 1
         fi
 
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
+    - name: Setup mise
+      uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4
 
     - name: Validate changelog.txt format
-      run: bundle exec factorix mod changelog check --release
+      run: factorix mod changelog check --release
 
     - name: Set git user for tag update
       if: github.event.action == 'synchronize'  # When new commits are pushed to PR
-      uses: git-actions/set-user@v1
+      uses: git-actions/set-user@1180609f1016323600d409f4fc020c4435dc6903 # v1
 
     - name: Update release tag to latest commit
       if: github.event.action == 'synchronize'  # When new commits are pushed to PR
