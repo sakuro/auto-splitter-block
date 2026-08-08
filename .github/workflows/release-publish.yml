@@ -31,7 +31,7 @@ jobs:
         echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
     - name: Checkout release tag
-      uses: actions/checkout@v5
+      uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       with:
         ref: ${{ steps.version.outputs.tag }}
         fetch-depth: 0
@@ -48,22 +48,20 @@ jobs:
         echo "✅ Version consistency verified: $FILE_VERSION"
 
     - name: Set git user
-      uses: git-actions/set-user@v1
+      uses: git-actions/set-user@1180609f1016323600d409f4fc020c4435dc6903 # v1
 
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
+    - name: Setup mise
+      uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4
 
     - name: Build and upload MOD to Factorio MOD portal
       env:
         FACTORIO_API_KEY: ${{ secrets.FACTORIO_API_KEY }}
-      run: bundle exec rake release:portal
+      run: mise run release:portal
 
     - name: Create GitHub Release
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: bundle exec rake release:github
+      run: mise run release:github
 
     - name: Checkout main branch
       run: git checkout main
@@ -74,7 +72,7 @@ jobs:
         mv changelog.txt.tmp changelog.txt
 
     - name: Verify changelog.txt format
-      run: bundle exec factorix mod changelog check
+      run: factorix mod changelog check
 
     - name: Commit and push changelog update
       run: |
