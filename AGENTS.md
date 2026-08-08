@@ -6,14 +6,14 @@ Factorio 2.0 MOD.
 
 ## Build and Install
 
-- `rake build` - Build release zip archive
-- `rake install` - Install to local Factorio MOD directory
+- `mise run build` - Build release zip archive
+- `mise run install` - Install to local Factorio MOD directory
 
 ## Release
 
-Releases are handled by GitHub Actions workflows. Do not run `rake release` manually.
+Releases are handled by GitHub Actions workflows. Do not run `mise run release:portal` / `mise run release:github` manually.
 
-Changelog is managed by `bundle exec factorix mod changelog` and follows Factorio's changelog.txt specification.
+Changelog is managed by `factorix mod changelog` and follows Factorio's changelog.txt specification.
 
 # Document Map
 
