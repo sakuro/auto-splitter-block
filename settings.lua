@@ -19,9 +19,16 @@ data:extend({
   },
   {
     type = "bool-setting",
+    name = "auto-splitter-block-unhide-no-item",
+    setting_type = "startup",
+    default_value = false,
+    order = "b",
+  },
+  {
+    type = "bool-setting",
     name = "auto-splitter-block-enable-for-automated-builds",
     setting_type = "runtime-global",
     default_value = false,
-    order = "b",
+    order = "c",
   },
 })
