@@ -1,5 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 Version: Unreleased
+  Features:
+    - Add a startup setting to make the base game's no-item selectable in filter UIs (splitters, inserters, logistics requests, etc.), disabled by default
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.0
 Date: 2026-06-24
