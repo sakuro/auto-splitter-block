@@ -21,6 +21,8 @@ Additional options with optional MODs:
 - [Null Item](https://mods.factorio.com/mod/atan-null)
 - [Null](https://mods.factorio.com/mod/null) (listed as "Null Item/Entity" on the MOD portal)
 
+By default, the base game's "no-item" item is hidden and cannot be picked from filter UIs manually. Enable "Make 'no item' selectable in filter UIs" in MOD Settings > Startup to unhide it, allowing manual selection in any filter UI in the game (splitters, inserters, logistics requests, etc.), not just this MOD's automatic blocking. Disabled by default since it affects the base game item globally.
+
 ## Automated Builds
 
 Entities built by construction robots or space platforms are ignored by default, to avoid overwriting filters set by blueprints (e.g. balancer designs). Space platforms have no manual placement — all platform construction goes through this same automated path, so enabling this is the only way to get auto-blocking working there.
