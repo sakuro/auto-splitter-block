@@ -17,6 +17,10 @@ describe("splitter_utils.is_circuit_controlled", function()
   it("is false when no circuit network is connected", function()
     assert.is_false(splitter_utils.is_circuit_controlled(factorio.splitter({})))
   end)
+
+  it("is true when both circuit networks are connected", function()
+    assert.is_true(splitter_utils.is_circuit_controlled(factorio.splitter({ circuit = "both" })))
+  end)
 end)
 
 describe("splitter_utils.find_affecting_splitters", function()
@@ -221,5 +225,58 @@ describe("splitter_utils.update_block_filter", function()
     splitter_utils.update_block_filter(splitter, left)
 
     assert.is_nil(splitter.splitter_filter)
+  end)
+
+  it("clears an existing block filter once neither output has a compatible entity", function()
+    local w = factorio.world()
+    local splitter = north_splitter(w, { splitter_filter = "no-item", priority = "left" })
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.is_nil(splitter.splitter_filter)
+  end)
+
+  it("is idempotent when the block filter is already set for the same side", function()
+    factorio.set_tick(7)
+    local w = factorio.world()
+    local splitter = north_splitter(w, { splitter_filter = "no-item", priority = "right" })
+    w.add(aligned_belt(-0.5, -1))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.equal("no-item", splitter.splitter_filter)
+    assert.equal("right", splitter.splitter_output_priority)
+    assert.is_nil(storage.saved_priorities[splitter.unit_number])
+  end)
+
+  it("counts an underground-belt output that side-loads the output tile", function()
+    local w = factorio.world()
+    local splitter = north_splitter(w)
+    w.add(factorio.underground_belt({
+      position = { x = -0.5, y = -1 },
+      belt_to_ground_type = "output",
+      direction = D.east,
+    }))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.equal("no-item", splitter.splitter_filter)
+    assert.equal("right", splitter.splitter_output_priority)
+  end)
+
+  it("ignores an underground-belt output pointing the splitter's own way", function()
+    local w = factorio.world()
+    local splitter = north_splitter(w)
+    w.add(factorio.underground_belt({
+      position = { x = -0.5, y = -1 },
+      belt_to_ground_type = "output",
+      direction = D.north,
+    }))
+    w.add(aligned_belt(0.5, -1))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.equal("no-item", splitter.splitter_filter)
+    assert.equal("left", splitter.splitter_output_priority)
   end)
 end)

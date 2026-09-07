@@ -41,12 +41,18 @@ function factorio.set_tick(tick)
   _G.game.tick = tick
 end
 
+-- Matches an entity's center point within 0.01, not its bounding box. A 2x1
+-- neighbour (splitter/loader) whose body covers an output tile but whose center
+-- sits elsewhere is out of this mock's reach; those scenarios need a
+-- bounding-box-aware rewrite (deferred).
 local function positions_near(a, b)
   return a ~= nil and b ~= nil
     and math.abs(a.x - b.x) < 0.01
     and math.abs(a.y - b.y) < 0.01
 end
 
+-- Inclusive on both edges, unlike Factorio's exclusive far edge. Harmless for
+-- the +/-2 area query find_affecting_splitters uses.
 local function in_area(pos, area)
   return pos.x >= area[1][1] and pos.x <= area[2][1]
     and pos.y >= area[1][2] and pos.y <= area[2][2]
@@ -78,6 +84,7 @@ function factorio.surface(opts)
       for _, e in ipairs(entities) do
         local ok = type_matches(e.type, query.type)
         if ok and query.position then
+          -- Center-point match only (see positions_near); no bounding-box test.
           ok = positions_near(e.position, query.position)
         end
         if ok and query.area then
