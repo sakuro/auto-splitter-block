@@ -6,14 +6,17 @@ hk = "1.57.0"
 actionlint = "latest"
 shellcheck = "latest"
 "github:sakuro/factorix" = "0.23.0"
+lua = "5.2" # Factorio's Lua version; never bump (see .github/renovate.json)
 
 [settings]
 minimum_release_age = "3d"
 
 [hooks]
 # hk install: skipped in CI (GitHub Actions sets CI); hk falls back to script shims on Git < 2.54.
+# busted: needed by `mise run test`, including in CI.
 postinstall = [
   'test -n "$CI" || hk install',
+  'luarocks install --local busted',
 ]
 
 [task_config]
