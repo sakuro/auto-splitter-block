@@ -39,9 +39,10 @@ function factorio.reset()
   _G.game = { tick = 1, surfaces = {} }
 end
 
---- Change the startup filter item. `lib/splitter_utils.lua` caches it into
---- BLOCK_FILTER at require time, so this only affects modules required after the
---- change; for already-required code it changes what `settings.startup` reports.
+--- Change what `settings.startup["auto-splitter-block-filter-item"]` reports.
+--- `lib/splitter_utils.lua` reads it lazily, so a change takes effect on the
+--- next call -- set it before the `update_block_filter` / `has_block_filter`
+--- under test.
 function factorio.set_filter_item(name)
   filter_item = name
 end
@@ -50,14 +51,39 @@ function factorio.set_tick(tick)
   _G.game.tick = tick
 end
 
--- Matches an entity's center point within 0.01, not its bounding box. A 2x1
--- neighbour (splitter/loader) whose body covers an output tile but whose center
--- sits elsewhere is out of this mock's reach; those scenarios need a
--- bounding-box-aware rewrite (deferred).
-local function positions_near(a, b)
-  return a ~= nil and b ~= nil
-    and math.abs(a.x - b.x) < 0.01
-    and math.abs(a.y - b.y) < 0.01
+local EPS = 0.01
+
+-- Tile footprint per entity type as {along-flow, across-flow}. The real API's
+-- `find_entities_filtered{position=}` returns any entity whose box contains the
+-- point, so a 2x1 splitter/loader is matched on either of its two tiles even
+-- though its `position` (centre) sits on the tile edge.
+local FOOTPRINT = {
+  ["transport-belt"] = {1, 1},
+  ["underground-belt"] = {1, 1},
+  ["loader-1x1"] = {1, 1},
+  ["loader"] = {2, 1},
+  ["splitter"] = {1, 2},
+}
+
+--- {left, top, right, bottom} tile-footprint box for a fake entity.
+local function entity_box(e)
+  local fp = FOOTPRINT[e.type] or {1, 1}
+  local along, across = fp[1], fp[2]
+  local horizontal = e.direction == _G.defines.direction.east
+    or e.direction == _G.defines.direction.west
+  local half_x = (horizontal and along or across) / 2
+  local half_y = (horizontal and across or along) / 2
+  return e.position.x - half_x, e.position.y - half_y,
+    e.position.x + half_x, e.position.y + half_y
+end
+
+local function box_contains(e, point)
+  if not (e.position and point) then
+    return false
+  end
+  local left, top, right, bottom = entity_box(e)
+  return point.x >= left - EPS and point.x <= right + EPS
+    and point.y >= top - EPS and point.y <= bottom + EPS
 end
 
 -- Inclusive on both edges, unlike Factorio's exclusive far edge. Harmless for
@@ -93,8 +119,7 @@ function factorio.surface(opts)
       for _, e in ipairs(entities) do
         local ok = type_matches(e.type, query.type)
         if ok and query.position then
-          -- Center-point match only (see positions_near); no bounding-box test.
-          ok = positions_near(e.position, query.position)
+          ok = box_contains(e, query.position)
         end
         if ok and query.area then
           ok = in_area(e.position, query.area)
@@ -164,13 +189,14 @@ function factorio.splitter(opts)
   }
 end
 
---- A fake transport belt. `surface` is needed when the belt is the argument to
---- find_affecting_splitters (which reads entity.surface).
+--- A fake 1x1 transport belt. `surface` is needed when the belt is the argument
+--- to find_affecting_splitters (which reads entity.surface). `opts.type`
+--- overrides "transport-belt" (e.g. "loader-1x1").
 function factorio.belt(opts)
   opts = opts or {}
   return {
     valid = true,
-    type = "transport-belt",
+    type = opts.type or "transport-belt",
     direction = opts.direction or _G.defines.direction.north,
     position = opts.position or { x = 0, y = 0 },
     surface = opts.surface,
@@ -184,6 +210,14 @@ function factorio.underground_belt(opts)
   belt.type = "underground-belt"
   belt.belt_to_ground_type = opts.belt_to_ground_type or "input"
   return belt
+end
+
+--- A fake 2x1 loader. Two tiles along its direction; used to exercise
+--- bounding-box matching in find_entities_filtered{position=}.
+function factorio.loader(opts)
+  local loader = factorio.belt(opts)
+  loader.type = "loader"
+  return loader
 end
 
 factorio.reset()
