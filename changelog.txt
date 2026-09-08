@@ -2,6 +2,8 @@
 Version: Unreleased
   Features:
     - Add a startup setting to make the base game's no-item selectable in filter UIs (splitters, inserters, logistics requests, etc.), disabled by default
+  Bugfixes:
+    - Preserve user-set splitter output priority when the auto-block filter is cleared on a later tick than it was applied
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.0
 Date: 2026-06-24

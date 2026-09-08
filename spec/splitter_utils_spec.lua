@@ -115,6 +115,25 @@ describe("splitter_utils.has_block_filter", function()
   end)
 end)
 
+describe("splitter_utils.forget_saved_priority", function()
+  before_each(factorio.reset)
+
+  it("drops a splitter's saved priority", function()
+    local splitter = factorio.splitter({})
+    storage.saved_priorities[splitter.unit_number] = "left"
+
+    splitter_utils.forget_saved_priority(splitter)
+
+    assert.is_nil(storage.saved_priorities[splitter.unit_number])
+  end)
+
+  it("is a no-op when nothing was saved", function()
+    assert.has_no.errors(function()
+      splitter_utils.forget_saved_priority(factorio.splitter({}))
+    end)
+  end)
+end)
+
 describe("splitter_utils.update_block_filter", function()
   before_each(factorio.reset)
 
@@ -181,7 +200,7 @@ describe("splitter_utils.update_block_filter", function()
     splitter_utils.update_block_filter(splitter)
 
     assert.is_nil(splitter.splitter_filter)
-    assert.equal("none", splitter.splitter_output_priority) -- no priority saved this tick
+    assert.equal("none", splitter.splitter_output_priority) -- nothing saved for this splitter
   end)
 
   it("leaves a filter set by something else alone", function()
@@ -195,18 +214,15 @@ describe("splitter_utils.update_block_filter", function()
     assert.equal("left", splitter.splitter_output_priority)
   end)
 
-  it("saves the original priority on set and restores it on a same-tick clear", function()
-    factorio.set_tick(5)
+  it("saves the original priority on set and restores it on clear", function()
     local w = factorio.world()
     local splitter = north_splitter(w, { priority = "left" })
-    local left = aligned_belt(-0.5, -1)
-    w.add(left)
+    w.add(aligned_belt(-0.5, -1))
 
     splitter_utils.update_block_filter(splitter)
     assert.equal("no-item", splitter.splitter_filter)
     assert.equal("right", splitter.splitter_output_priority)
     assert.equal("left", storage.saved_priorities[splitter.unit_number])
-    assert.equal(5, storage.saved_priorities.tick)
 
     w.add(aligned_belt(0.5, -1))
     splitter_utils.update_block_filter(splitter)
@@ -214,6 +230,57 @@ describe("splitter_utils.update_block_filter", function()
     assert.is_nil(splitter.splitter_filter)
     assert.equal("left", splitter.splitter_output_priority)
     assert.is_nil(storage.saved_priorities[splitter.unit_number])
+  end)
+
+  it("restores the saved priority on a clear in a later tick than the set", function()
+    factorio.set_tick(5)
+    local w = factorio.world()
+    local splitter = north_splitter(w, { priority = "left" })
+    w.add(aligned_belt(-0.5, -1))
+    splitter_utils.update_block_filter(splitter)
+    assert.equal("right", splitter.splitter_output_priority)
+
+    factorio.set_tick(120)
+    w.add(aligned_belt(0.5, -1))
+    splitter_utils.update_block_filter(splitter)
+
+    assert.is_nil(splitter.splitter_filter)
+    assert.equal("left", splitter.splitter_output_priority)
+    assert.is_nil(storage.saved_priorities[splitter.unit_number])
+  end)
+
+  it("restores the saved priority when both outputs go empty in a later tick", function()
+    factorio.set_tick(5)
+    local w = factorio.world()
+    local splitter = north_splitter(w, { priority = "left" })
+    local left = w.add(aligned_belt(-0.5, -1))
+    splitter_utils.update_block_filter(splitter)
+    assert.equal("right", splitter.splitter_output_priority)
+
+    factorio.set_tick(120)
+    w.remove(left)
+    splitter_utils.update_block_filter(splitter)
+
+    assert.is_nil(splitter.splitter_filter)
+    assert.equal("left", splitter.splitter_output_priority)
+  end)
+
+  it("keeps the saved priority across a re-block in a later tick", function()
+    factorio.set_tick(5)
+    local w = factorio.world()
+    local splitter = north_splitter(w, { priority = "left" })
+    w.add(aligned_belt(-0.5, -1))
+    splitter_utils.update_block_filter(splitter)
+    assert.equal("left", storage.saved_priorities[splitter.unit_number])
+
+    -- Filter cleared out of band (e.g. via the splitter GUI), then re-evaluated
+    -- a later tick: the MOD must not re-save its own "right" as the user's value.
+    splitter.splitter_filter = nil
+    factorio.set_tick(120)
+    splitter_utils.update_block_filter(splitter)
+
+    assert.equal("no-item", splitter.splitter_filter)
+    assert.equal("left", storage.saved_priorities[splitter.unit_number])
   end)
 
   it("ignores the excluded entity when scanning the outputs", function()
@@ -237,7 +304,6 @@ describe("splitter_utils.update_block_filter", function()
   end)
 
   it("is idempotent when the block filter is already set for the same side", function()
-    factorio.set_tick(7)
     local w = factorio.world()
     local splitter = north_splitter(w, { splitter_filter = "no-item", priority = "right" })
     w.add(aligned_belt(-0.5, -1))
