@@ -90,11 +90,14 @@ end
 local function set_block_filter(splitter, side)
   local id = splitter.unit_number
   -- Save the user's priority so clear_block_filter can restore it. Keyed by
-  -- unit_number and kept until the matching clear or the splitter's removal --
-  -- a block and its clear are usually ticks or minutes apart, whenever the
-  -- other output side gets (dis)connected.
+  -- unit_number and kept until the matching clear -- a block and its clear are
+  -- usually ticks or minutes apart, whenever the other output side gets
+  -- (dis)connected. register_on_object_destroyed lets the engine tell us when
+  -- the splitter is gone so the entry cannot leak (biters, explosions, script
+  -- removal -- the mining events do not cover those).
   if storage.saved_priorities[id] == nil then
     storage.saved_priorities[id] = splitter.splitter_output_priority
+    script.register_on_object_destroyed(splitter)
   end
   splitter.splitter_filter = BLOCK_FILTER
   splitter.splitter_output_priority = side
@@ -102,14 +105,44 @@ end
 
 local function clear_block_filter(splitter)
   local id = splitter.unit_number
-  local restored_priority = storage.saved_priorities[id] or "none"
+  local saved = storage.saved_priorities[id]
   storage.saved_priorities[id] = nil
   splitter.splitter_filter = nil
-  splitter.splitter_output_priority = restored_priority
+  -- A non-string value can only be legacy junk (pre-0.7 saved a { priority = }
+  -- table); fall back to "none" rather than hand it to the API.
+  splitter.splitter_output_priority = type(saved) == "string" and saved or "none"
 end
 
-local function forget_saved_priority(splitter)
-  storage.saved_priorities[splitter.unit_number] = nil
+local function discard_saved_priority(unit_number)
+  storage.saved_priorities[unit_number] = nil
+end
+
+--- Rebuild storage.saved_priorities from the live world, keeping one entry per
+--- splitter that currently carries the block filter (its priority read from the
+--- old entry, string or legacy { priority = } table; dropped when unrecoverable).
+--- Clears the legacy table-level `tick` key and entries orphaned by a removed
+--- splitter, and re-registers the survivors for on_object_destroyed. Idempotent;
+--- run from on_configuration_changed.
+local function sanitize_saved_priorities()
+  local old = storage.saved_priorities or {}
+  local fresh = {}
+
+  for _, surface in pairs(game.surfaces) do
+    for _, splitter in pairs(surface.find_entities_filtered{type = "splitter"}) do
+      if has_block_filter(splitter) then
+        local saved = old[splitter.unit_number]
+        if type(saved) == "table" then
+          saved = saved.priority
+        end
+        if type(saved) == "string" then
+          fresh[splitter.unit_number] = saved
+          script.register_on_object_destroyed(splitter)
+        end
+      end
+    end
+  end
+
+  storage.saved_priorities = fresh
 end
 
 local function update_block_filter(splitter, exclude_entity)
@@ -134,6 +167,7 @@ return {
   find_affecting_splitters = find_affecting_splitters,
   has_block_filter = has_block_filter,
   clear_block_filter = clear_block_filter,
-  forget_saved_priority = forget_saved_priority,
+  discard_saved_priority = discard_saved_priority,
+  sanitize_saved_priorities = sanitize_saved_priorities,
   update_block_filter = update_block_filter,
 }

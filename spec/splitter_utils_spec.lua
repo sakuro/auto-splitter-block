@@ -115,22 +115,89 @@ describe("splitter_utils.has_block_filter", function()
   end)
 end)
 
-describe("splitter_utils.forget_saved_priority", function()
+describe("splitter_utils.discard_saved_priority", function()
   before_each(factorio.reset)
 
-  it("drops a splitter's saved priority", function()
-    local splitter = factorio.splitter({})
-    storage.saved_priorities[splitter.unit_number] = "left"
+  it("drops the entry for a unit_number", function()
+    storage.saved_priorities[7] = "left"
 
-    splitter_utils.forget_saved_priority(splitter)
+    splitter_utils.discard_saved_priority(7)
 
-    assert.is_nil(storage.saved_priorities[splitter.unit_number])
+    assert.is_nil(storage.saved_priorities[7])
   end)
 
-  it("is a no-op when nothing was saved", function()
+  it("is a no-op for an unknown unit_number", function()
     assert.has_no.errors(function()
-      splitter_utils.forget_saved_priority(factorio.splitter({}))
+      splitter_utils.discard_saved_priority(999)
     end)
+  end)
+end)
+
+describe("splitter_utils.sanitize_saved_priorities", function()
+  before_each(factorio.reset)
+
+  local function blocked_splitter(world, unit_number)
+    return world.add(factorio.splitter({ unit_number = unit_number, splitter_filter = "no-item" }))
+  end
+
+  it("drops the legacy table-level tick key", function()
+    factorio.world()
+    storage.saved_priorities = { tick = 42 }
+
+    splitter_utils.sanitize_saved_priorities()
+
+    assert.same({}, storage.saved_priorities)
+  end)
+
+  it("keeps a string entry for a currently block-filtered splitter and re-registers it", function()
+    local w = factorio.world()
+    blocked_splitter(w, 7)
+    storage.saved_priorities = { [7] = "left" }
+
+    splitter_utils.sanitize_saved_priorities()
+
+    assert.equal("left", storage.saved_priorities[7])
+    assert.is_true(factorio.registered_for_destroy[7])
+  end)
+
+  it("normalizes a legacy { priority = ... } entry to its string", function()
+    local w = factorio.world()
+    blocked_splitter(w, 3)
+    storage.saved_priorities = { [3] = { priority = "right", tick = 10 } }
+
+    splitter_utils.sanitize_saved_priorities()
+
+    assert.equal("right", storage.saved_priorities[3])
+  end)
+
+  it("drops an entry whose splitter is gone", function()
+    local w = factorio.world()
+    blocked_splitter(w, 1)
+    storage.saved_priorities = { [1] = "left", [999] = "right" }
+
+    splitter_utils.sanitize_saved_priorities()
+
+    assert.is_nil(storage.saved_priorities[999])
+  end)
+
+  it("leaves no entry for a block-filtered splitter whose value is unrecoverable", function()
+    local w = factorio.world()
+    blocked_splitter(w, 4)
+    storage.saved_priorities = {}
+
+    splitter_utils.sanitize_saved_priorities()
+
+    assert.is_nil(storage.saved_priorities[4])
+  end)
+
+  it("ignores splitters without the block filter", function()
+    local w = factorio.world()
+    w.add(factorio.splitter({ unit_number = 5 }))
+    storage.saved_priorities = { [5] = "left" }
+
+    splitter_utils.sanitize_saved_priorities()
+
+    assert.is_nil(storage.saved_priorities[5])
   end)
 end)
 
@@ -223,12 +290,27 @@ describe("splitter_utils.update_block_filter", function()
     assert.equal("no-item", splitter.splitter_filter)
     assert.equal("right", splitter.splitter_output_priority)
     assert.equal("left", storage.saved_priorities[splitter.unit_number])
+    assert.is_true(factorio.registered_for_destroy[splitter.unit_number])
 
     w.add(aligned_belt(0.5, -1))
     splitter_utils.update_block_filter(splitter)
 
     assert.is_nil(splitter.splitter_filter)
     assert.equal("left", splitter.splitter_output_priority)
+    assert.is_nil(storage.saved_priorities[splitter.unit_number])
+  end)
+
+  it("restores none when the saved value is a legacy table", function()
+    local w = factorio.world()
+    local splitter = north_splitter(w, { splitter_filter = "no-item", priority = "right" })
+    storage.saved_priorities[splitter.unit_number] = { priority = "left", tick = 5 }
+    w.add(aligned_belt(-0.5, -1))
+    w.add(aligned_belt(0.5, -1))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.is_nil(splitter.splitter_filter)
+    assert.equal("none", splitter.splitter_output_priority)
     assert.is_nil(storage.saved_priorities[splitter.unit_number])
   end)
 

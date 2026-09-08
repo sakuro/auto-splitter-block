@@ -6,9 +6,7 @@ script.on_init(function()
 end)
 
 script.on_configuration_changed(function()
-  if not storage.saved_priorities then
-    storage.saved_priorities = {}
-  end
+  splitter_utils.sanitize_saved_priorities()
 end)
 
 local function on_splitter_placed(splitter)
@@ -72,22 +70,22 @@ end
 
 local function on_entity_removed(event)
   local entity = event.entity
-  if entity.type == "splitter" then
-    splitter_utils.forget_saved_priority(entity)
-  end
   if entity_utils.is_transport_entity(entity) then
     on_transport_removed(entity)
   end
 end
 
 local function on_entity_removed_automated(event)
-  -- Drop a removed splitter's saved priority even when automated-build handling
-  -- is off: the entry must not outlive the entity.
-  if event.entity.type == "splitter" then
-    splitter_utils.forget_saved_priority(event.entity)
-  end
   if not is_automated_build_enabled() then return end
   on_entity_removed(event)
+end
+
+-- A splitter registered by set_block_filter was destroyed by any means (mined,
+-- died, script). Drop its saved priority.
+local function on_object_destroyed(event)
+  if event.type == defines.target_type.entity then
+    splitter_utils.discard_saved_priority(event.useful_id)
+  end
 end
 
 local ENTITY_FILTER = {
@@ -108,3 +106,5 @@ script.on_event(defines.events.on_space_platform_mined_entity, on_entity_removed
 
 script.on_event(defines.events.on_player_rotated_entity, on_entity_orientation_changed)
 script.on_event(defines.events.on_player_flipped_entity, on_entity_orientation_changed)
+
+script.on_event(defines.events.on_object_destroyed, on_object_destroyed)

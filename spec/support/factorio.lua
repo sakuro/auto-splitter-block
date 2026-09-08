@@ -9,6 +9,14 @@ local next_unit_number
 _G.defines = {
   direction = { north = 0, east = 4, south = 8, west = 12 },
   wire_type = { red = 1, green = 2 },
+  target_type = { entity = 1 },
+}
+
+--- unit_number -> true for every entity passed to register_on_object_destroyed.
+_G.script = {
+  register_on_object_destroyed = function(entity)
+    factorio.registered_for_destroy[entity.unit_number] = true
+  end,
 }
 
 _G.settings = {
@@ -26,8 +34,9 @@ _G.settings = {
 function factorio.reset()
   filter_item = DEFAULT_FILTER_ITEM
   next_unit_number = 0
+  factorio.registered_for_destroy = {}
   _G.storage = { saved_priorities = {} }
-  _G.game = { tick = 1 }
+  _G.game = { tick = 1, surfaces = {} }
 end
 
 --- Change the startup filter item. `lib/splitter_utils.lua` caches it into
@@ -104,10 +113,12 @@ end
 
 --- A surface plus a mutable entity list. `w.add(entity)` registers an entity so
 --- `w.surface.find_entities_filtered` sees it, defaulting its `surface` field to
---- `w.surface`. `w.remove(entity)` deregisters it. Both return the entity.
+--- `w.surface`. `w.remove(entity)` deregisters it. Both return the entity. The
+--- surface is also pushed onto `game.surfaces`.
 function factorio.world()
   local entities = {}
   local surface = factorio.surface({ entities = entities })
+  _G.game.surfaces[#_G.game.surfaces + 1] = surface
   return {
     surface = surface,
     add = function(entity)
