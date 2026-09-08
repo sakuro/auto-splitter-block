@@ -4,6 +4,7 @@ Version: Unreleased
     - Add a startup setting to make the base game's no-item selectable in filter UIs (splitters, inserters, logistics requests, etc.), disabled by default
   Bugfixes:
     - Preserve user-set splitter output priority when the auto-block filter is cleared on a later tick than it was applied
+    - Prevent a rare error on MOD update from a pre-0.7 save, and stop a splitter's saved output priority from lingering after the splitter is destroyed
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.0
 Date: 2026-06-24
