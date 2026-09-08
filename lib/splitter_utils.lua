@@ -88,11 +88,12 @@ local function has_block_filter(splitter)
 end
 
 local function set_block_filter(splitter, side)
-  if storage.saved_priorities.tick ~= game.tick then
-    storage.saved_priorities = {tick = game.tick}
-  end
   local id = splitter.unit_number
-  if not storage.saved_priorities[id] then
+  -- Save the user's priority so clear_block_filter can restore it. Keyed by
+  -- unit_number and kept until the matching clear or the splitter's removal --
+  -- a block and its clear are usually ticks or minutes apart, whenever the
+  -- other output side gets (dis)connected.
+  if storage.saved_priorities[id] == nil then
     storage.saved_priorities[id] = splitter.splitter_output_priority
   end
   splitter.splitter_filter = BLOCK_FILTER
@@ -101,13 +102,14 @@ end
 
 local function clear_block_filter(splitter)
   local id = splitter.unit_number
-  local restored_priority = "none"
-  if storage.saved_priorities.tick == game.tick then
-    restored_priority = storage.saved_priorities[id] or "none"
-    storage.saved_priorities[id] = nil
-  end
+  local restored_priority = storage.saved_priorities[id] or "none"
+  storage.saved_priorities[id] = nil
   splitter.splitter_filter = nil
   splitter.splitter_output_priority = restored_priority
+end
+
+local function forget_saved_priority(splitter)
+  storage.saved_priorities[splitter.unit_number] = nil
 end
 
 local function update_block_filter(splitter, exclude_entity)
@@ -132,5 +134,6 @@ return {
   find_affecting_splitters = find_affecting_splitters,
   has_block_filter = has_block_filter,
   clear_block_filter = clear_block_filter,
+  forget_saved_priority = forget_saved_priority,
   update_block_filter = update_block_filter,
 }

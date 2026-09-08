@@ -72,12 +72,20 @@ end
 
 local function on_entity_removed(event)
   local entity = event.entity
+  if entity.type == "splitter" then
+    splitter_utils.forget_saved_priority(entity)
+  end
   if entity_utils.is_transport_entity(entity) then
     on_transport_removed(entity)
   end
 end
 
 local function on_entity_removed_automated(event)
+  -- Drop a removed splitter's saved priority even when automated-build handling
+  -- is off: the entry must not outlive the entity.
+  if event.entity.type == "splitter" then
+    splitter_utils.forget_saved_priority(event.entity)
+  end
   if not is_automated_build_enabled() then return end
   on_entity_removed(event)
 end

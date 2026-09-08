@@ -104,7 +104,7 @@ end
 
 --- A surface plus a mutable entity list. `w.add(entity)` registers an entity so
 --- `w.surface.find_entities_filtered` sees it, defaulting its `surface` field to
---- `w.surface`. Returns the entity.
+--- `w.surface`. `w.remove(entity)` deregisters it. Both return the entity.
 function factorio.world()
   local entities = {}
   local surface = factorio.surface({ entities = entities })
@@ -113,6 +113,15 @@ function factorio.world()
     add = function(entity)
       entity.surface = entity.surface or surface
       entities[#entities + 1] = entity
+      return entity
+    end,
+    remove = function(entity)
+      for i, e in ipairs(entities) do
+        if e == entity then
+          table.remove(entities, i)
+          break
+        end
+      end
       return entity
     end,
   }
