@@ -113,6 +113,15 @@ describe("splitter_utils.has_block_filter", function()
   it("is false for a different filter item", function()
     assert.is_false(splitter_utils.has_block_filter(factorio.splitter({ splitter_filter = "iron-plate" })))
   end)
+
+  it("follows the configured filter item", function()
+    assert.is_false(splitter_utils.has_block_filter(factorio.splitter({ splitter_filter = "deconstruction-planner" })))
+
+    factorio.set_filter_item("deconstruction-planner")
+
+    assert.is_true(splitter_utils.has_block_filter(factorio.splitter({ splitter_filter = "deconstruction-planner" })))
+    assert.is_false(splitter_utils.has_block_filter(factorio.splitter({ splitter_filter = "no-item" })))
+  end)
 end)
 
 describe("splitter_utils.discard_saved_priority", function()
@@ -225,6 +234,55 @@ describe("splitter_utils.update_block_filter", function()
 
     assert.equal("no-item", splitter.splitter_filter)
     assert.equal("right", splitter.splitter_output_priority)
+  end)
+
+  it("sees a same-direction 2x1 splitter whose body covers the left output tile", function()
+    local w = factorio.world()
+    local splitter = north_splitter(w, { priority = "left" })
+    -- North splitter at {-1,-1}: its 2x1 body covers {-0.5,-1} (the left output)
+    -- but not {0.5,-1} (the right one). Its centre sits on the tile edge, so a
+    -- centre-only match would miss it.
+    w.add(factorio.splitter({ position = { x = -1, y = -1 }, direction = D.north, surface = w.surface }))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.equal("no-item", splitter.splitter_filter)
+    assert.equal("right", splitter.splitter_output_priority)
+    assert.equal("left", storage.saved_priorities[splitter.unit_number])
+  end)
+
+  it("sees a 2x1 loader whose body covers an output tile", function()
+    local w = factorio.world()
+    local splitter = north_splitter(w)
+    -- North loader at {-0.5,-1.5}: 2 tiles long in y, so its body reaches the
+    -- left output tile {-0.5,-1} while its centre sits a tile away.
+    w.add(factorio.loader({ position = { x = -0.5, y = -1.5 }, direction = D.north, surface = w.surface }))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.equal("right", splitter.splitter_output_priority)
+  end)
+
+  it("ignores a 2x1 splitter that covers the output tile but faces another direction", function()
+    local w = factorio.world()
+    local splitter = north_splitter(w)
+    w.add(factorio.splitter({ position = { x = -1, y = -1 }, direction = D.south, surface = w.surface }))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.is_nil(splitter.splitter_filter)
+  end)
+
+  it("uses the configured filter item", function()
+    factorio.set_filter_item("deconstruction-planner")
+    local w = factorio.world()
+    local splitter = north_splitter(w)
+    w.add(aligned_belt(-0.5, -1))
+
+    splitter_utils.update_block_filter(splitter)
+
+    assert.equal("deconstruction-planner", splitter.splitter_filter)
+    assert.is_true(splitter_utils.has_block_filter(splitter))
   end)
 
   it("blocks the left side when only the right output has a compatible entity", function()

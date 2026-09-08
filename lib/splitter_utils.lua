@@ -1,6 +1,11 @@
 local entity_utils = require("lib.entity_utils")
 
-local BLOCK_FILTER = settings.startup["auto-splitter-block-filter-item"].value
+-- Read lazily rather than caching at require time: the value is a startup
+-- setting (fixed for a session) so it costs nothing in practice, and specs can
+-- vary it per case.
+local function block_filter_item()
+  return settings.startup["auto-splitter-block-filter-item"].value
+end
 
 -- {left_dx, left_dy, right_dx, right_dy}
 local OUTPUT_OFFSETS = {
@@ -84,7 +89,7 @@ local function has_block_filter(splitter)
   local filter = splitter.splitter_filter
   if not filter then return false end
   local name = type(filter) == "string" and filter or filter.name
-  return name == BLOCK_FILTER
+  return name == block_filter_item()
 end
 
 local function set_block_filter(splitter, side)
@@ -99,7 +104,7 @@ local function set_block_filter(splitter, side)
     storage.saved_priorities[id] = splitter.splitter_output_priority
     script.register_on_object_destroyed(splitter)
   end
-  splitter.splitter_filter = BLOCK_FILTER
+  splitter.splitter_filter = block_filter_item()
   splitter.splitter_output_priority = side
 end
 
