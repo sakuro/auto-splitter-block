@@ -2,7 +2,7 @@
 gh = "2.100.0"
 gitleaks = "8.30"
 jq = "1.8.2"
-hk = "1.57.0"
+hk = "1.58.1"
 actionlint = "latest"
 shellcheck = "latest"
 "github:sakuro/factorix" = "0.23.0"
