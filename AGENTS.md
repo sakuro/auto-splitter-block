@@ -50,6 +50,7 @@ Do not create a section for the next release version directly — version bumpin
 
 - README.md: Project overview
 - CONTRIBUTING.md: Pull request guidelines
+- .scaffold-sync.json / .scaffold-sync.paths: scaffold-drift sync state and tracked-path list; do not delete (see CONTRIBUTING.md "Scaffold drift")
 
 # External References
 
