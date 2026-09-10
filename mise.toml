@@ -5,7 +5,7 @@ jq = "1.8.2"
 hk = "1.57.0"
 actionlint = "latest"
 shellcheck = "latest"
-"github:sakuro/factorix" = "0.23.0"
+"github:sakuro/factorix" = "0.24.0"
 lua = "5.2" # Factorio's Lua version; never bump (see .github/renovate.json)
 
 [settings]
