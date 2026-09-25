@@ -69,8 +69,8 @@ describe("splitter_utils.find_affecting_splitters", function()
 
   it("returns every splitter whose output lands on the belt's tile", function()
     local w = factorio.world()
-    w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = D.north }))   -- right output {0.5,-1}
-    w.add(factorio.splitter({ position = { x = 1, y = 0 }, direction = D.north }))   -- left output {0.5,-1}
+    w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = D.north })) -- right output {0.5,-1}
+    w.add(factorio.splitter({ position = { x = 1, y = 0 }, direction = D.north })) -- left output {0.5,-1}
     local belt = factorio.belt({ position = { x = 0.5, y = -1 }, surface = w.surface })
 
     assert.equal(2, #splitter_utils.find_affecting_splitters(belt))
@@ -85,8 +85,9 @@ describe("splitter_utils.find_affecting_splitters", function()
 
   it("matches when one of a 2x1 entity's occupied tiles is an output tile", function()
     local w = factorio.world()
-    local a = w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = D.north }))     -- right output {0.5,-1}
-    local b = w.add(factorio.splitter({ position = { x = 0.5, y = -1.5 }, direction = D.east })) -- occupies {0.5,-2},{0.5,-1}
+    local a = w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = D.north })) -- right output {0.5,-1}
+    -- occupies {0.5,-2},{0.5,-1}
+    local b = w.add(factorio.splitter({ position = { x = 0.5, y = -1.5 }, direction = D.east }))
 
     local result = splitter_utils.find_affecting_splitters(b)
 

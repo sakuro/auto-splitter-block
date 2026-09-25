@@ -10,14 +10,18 @@ script.on_configuration_changed(function()
 end)
 
 local function on_splitter_placed(splitter)
-  if splitter_utils.is_circuit_controlled(splitter) then return end
+  if splitter_utils.is_circuit_controlled(splitter) then
+    return
+  end
   splitter_utils.update_block_filter(splitter)
 end
 
 local function on_transport_placed(entity)
   local splitters = splitter_utils.find_affecting_splitters(entity)
   for _, splitter in ipairs(splitters) do
-    if splitter_utils.is_circuit_controlled(splitter) then goto continue end
+    if splitter_utils.is_circuit_controlled(splitter) then
+      goto continue
+    end
     splitter_utils.update_block_filter(splitter)
     ::continue::
   end
@@ -26,7 +30,9 @@ end
 local function on_transport_removed(entity)
   local splitters = splitter_utils.find_affecting_splitters(entity)
   for _, splitter in ipairs(splitters) do
-    if splitter_utils.is_circuit_controlled(splitter) then goto continue end
+    if splitter_utils.is_circuit_controlled(splitter) then
+      goto continue
+    end
     splitter_utils.update_block_filter(splitter, entity)
     ::continue::
   end
@@ -64,7 +70,9 @@ local function on_entity_built(event)
 end
 
 local function on_entity_built_automated(event)
-  if not is_automated_build_enabled() then return end
+  if not is_automated_build_enabled() then
+    return
+  end
   on_entity_built(event)
 end
 
@@ -76,7 +84,9 @@ local function on_entity_removed(event)
 end
 
 local function on_entity_removed_automated(event)
-  if not is_automated_build_enabled() then return end
+  if not is_automated_build_enabled() then
+    return
+  end
   on_entity_removed(event)
 end
 
@@ -89,11 +99,11 @@ local function on_object_destroyed(event)
 end
 
 local ENTITY_FILTER = {
-  {filter = "type", type = "splitter"},
-  {filter = "type", type = "transport-belt"},
-  {filter = "type", type = "underground-belt"},
-  {filter = "type", type = "loader"},
-  {filter = "type", type = "loader-1x1"},
+  { filter = "type", type = "splitter" },
+  { filter = "type", type = "transport-belt" },
+  { filter = "type", type = "underground-belt" },
+  { filter = "type", type = "loader" },
+  { filter = "type", type = "loader-1x1" },
 }
 
 script.on_event(defines.events.on_built_entity, on_entity_built, ENTITY_FILTER)
