@@ -34,23 +34,39 @@ describe("entity_utils.is_output_compatible", function()
   end)
 
   it("rejects an underground-belt output pointing the same way as the splitter", function()
-    assert.is_false(entity_utils.is_output_compatible(
-      { type = "underground-belt", belt_to_ground_type = "output", direction = SOUTH }, SOUTH))
+    assert.is_false(
+      entity_utils.is_output_compatible(
+        { type = "underground-belt", belt_to_ground_type = "output", direction = SOUTH },
+        SOUTH
+      )
+    )
   end)
 
   it("accepts an underground-belt output pointing perpendicular (side-loading)", function()
-    assert.is_true(entity_utils.is_output_compatible(
-      { type = "underground-belt", belt_to_ground_type = "output", direction = 4 }, SOUTH))
+    assert.is_true(
+      entity_utils.is_output_compatible(
+        { type = "underground-belt", belt_to_ground_type = "output", direction = 4 },
+        SOUTH
+      )
+    )
   end)
 
   it("accepts an underground-belt input pointing the same way as the splitter", function()
-    assert.is_true(entity_utils.is_output_compatible(
-      { type = "underground-belt", belt_to_ground_type = "input", direction = SOUTH }, SOUTH))
+    assert.is_true(
+      entity_utils.is_output_compatible(
+        { type = "underground-belt", belt_to_ground_type = "input", direction = SOUTH },
+        SOUTH
+      )
+    )
   end)
 
   it("rejects an underground-belt input facing back into the splitter", function()
-    assert.is_false(entity_utils.is_output_compatible(
-      { type = "underground-belt", belt_to_ground_type = "input", direction = 0 }, SOUTH))
+    assert.is_false(
+      entity_utils.is_output_compatible(
+        { type = "underground-belt", belt_to_ground_type = "input", direction = 0 },
+        SOUTH
+      )
+    )
   end)
 
   it("accepts a splitter aligned with the splitter direction", function()

@@ -58,23 +58,21 @@ local EPS = 0.01
 -- point, so a 2x1 splitter/loader is matched on either of its two tiles even
 -- though its `position` (centre) sits on the tile edge.
 local FOOTPRINT = {
-  ["transport-belt"] = {1, 1},
-  ["underground-belt"] = {1, 1},
-  ["loader-1x1"] = {1, 1},
-  ["loader"] = {2, 1},
-  ["splitter"] = {1, 2},
+  ["transport-belt"] = { 1, 1 },
+  ["underground-belt"] = { 1, 1 },
+  ["loader-1x1"] = { 1, 1 },
+  ["loader"] = { 2, 1 },
+  ["splitter"] = { 1, 2 },
 }
 
 --- {left, top, right, bottom} tile-footprint box for a fake entity.
 local function entity_box(e)
-  local fp = FOOTPRINT[e.type] or {1, 1}
+  local fp = FOOTPRINT[e.type] or { 1, 1 }
   local along, across = fp[1], fp[2]
-  local horizontal = e.direction == _G.defines.direction.east
-    or e.direction == _G.defines.direction.west
+  local horizontal = e.direction == _G.defines.direction.east or e.direction == _G.defines.direction.west
   local half_x = (horizontal and along or across) / 2
   local half_y = (horizontal and across or along) / 2
-  return e.position.x - half_x, e.position.y - half_y,
-    e.position.x + half_x, e.position.y + half_y
+  return e.position.x - half_x, e.position.y - half_y, e.position.x + half_x, e.position.y + half_y
 end
 
 local function box_contains(e, point)
@@ -82,15 +80,13 @@ local function box_contains(e, point)
     return false
   end
   local left, top, right, bottom = entity_box(e)
-  return point.x >= left - EPS and point.x <= right + EPS
-    and point.y >= top - EPS and point.y <= bottom + EPS
+  return point.x >= left - EPS and point.x <= right + EPS and point.y >= top - EPS and point.y <= bottom + EPS
 end
 
 -- Inclusive on both edges, unlike Factorio's exclusive far edge. Harmless for
 -- the +/-2 area query find_affecting_splitters uses.
 local function in_area(pos, area)
-  return pos.x >= area[1][1] and pos.x <= area[2][1]
-    and pos.y >= area[1][2] and pos.y <= area[2][2]
+  return pos.x >= area[1][1] and pos.x <= area[2][1] and pos.y >= area[1][2] and pos.y <= area[2][2]
 end
 
 local function type_matches(entity_type, query_type)

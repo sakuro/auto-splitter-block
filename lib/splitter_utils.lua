@@ -9,39 +9,37 @@ end
 
 -- {left_dx, left_dy, right_dx, right_dy}
 local OUTPUT_OFFSETS = {
-  [defines.direction.north] = {-0.5, -1,  0.5, -1},
-  [defines.direction.east]  = { 1, -0.5,  1,  0.5},
-  [defines.direction.south] = { 0.5,  1, -0.5,  1},
-  [defines.direction.west]  = {-1,  0.5, -1, -0.5},
+  [defines.direction.north] = { -0.5, -1, 0.5, -1 },
+  [defines.direction.east] = { 1, -0.5, 1, 0.5 },
+  [defines.direction.south] = { 0.5, 1, -0.5, 1 },
+  [defines.direction.west] = { -1, 0.5, -1, -0.5 },
 }
 
 local function positions_match(pos_a, pos_b)
-  return math.abs(pos_a.x - pos_b.x) < 0.01
-     and math.abs(pos_a.y - pos_b.y) < 0.01
+  return math.abs(pos_a.x - pos_b.x) < 0.01 and math.abs(pos_a.y - pos_b.y) < 0.01
 end
 
 local function get_output_positions(splitter)
   local pos = splitter.position
   local offsets = OUTPUT_OFFSETS[splitter.direction]
-  local left_pos  = {x = pos.x + offsets[1], y = pos.y + offsets[2]}
-  local right_pos = {x = pos.x + offsets[3], y = pos.y + offsets[4]}
+  local left_pos = { x = pos.x + offsets[1], y = pos.y + offsets[2] }
+  local right_pos = { x = pos.x + offsets[3], y = pos.y + offsets[4] }
   return left_pos, right_pos
 end
 
 local function is_circuit_controlled(splitter)
   return splitter.get_circuit_network(defines.wire_type.red) ~= nil
-      or splitter.get_circuit_network(defines.wire_type.green) ~= nil
+    or splitter.get_circuit_network(defines.wire_type.green) ~= nil
 end
 
 -- exclude_entity: entity to ignore (used during removal events)
 local function has_compatible_entity_at(surface, position, splitter_dir, exclude_entity)
-  local entities = surface.find_entities_filtered{
+  local entities = surface.find_entities_filtered({
     position = position,
-    type = {"transport-belt", "underground-belt", "splitter", "loader", "loader-1x1"},
-  }
+    type = { "transport-belt", "underground-belt", "splitter", "loader", "loader-1x1" },
+  })
   for _, entity in ipairs(entities) do
-    if entity ~= exclude_entity and
-       entity_utils.is_output_compatible(entity, splitter_dir) then
+    if entity ~= exclude_entity and entity_utils.is_output_compatible(entity, splitter_dir) then
       return true
     end
   end
@@ -55,21 +53,21 @@ local function get_tile_positions(entity)
   if etype == "splitter" or etype == "loader" then
     local dir = entity.direction
     if dir == defines.direction.north or dir == defines.direction.south then
-      return {{x = pos.x - 0.5, y = pos.y}, {x = pos.x + 0.5, y = pos.y}}
+      return { { x = pos.x - 0.5, y = pos.y }, { x = pos.x + 0.5, y = pos.y } }
     else
-      return {{x = pos.x, y = pos.y - 0.5}, {x = pos.x, y = pos.y + 0.5}}
+      return { { x = pos.x, y = pos.y - 0.5 }, { x = pos.x, y = pos.y + 0.5 } }
     end
   end
-  return {{x = pos.x, y = pos.y}}
+  return { { x = pos.x, y = pos.y } }
 end
 
 local function find_affecting_splitters(entity)
   local pos = entity.position
   local tile_positions = get_tile_positions(entity)
-  local splitters = entity.surface.find_entities_filtered{
+  local splitters = entity.surface.find_entities_filtered({
     type = "splitter",
-    area = {{pos.x - 2, pos.y - 2}, {pos.x + 2, pos.y + 2}},
-  }
+    area = { { pos.x - 2, pos.y - 2 }, { pos.x + 2, pos.y + 2 } },
+  })
   local result = {}
   for _, splitter in ipairs(splitters) do
     if splitter ~= entity then
@@ -87,7 +85,9 @@ end
 
 local function has_block_filter(splitter)
   local filter = splitter.splitter_filter
-  if not filter then return false end
+  if not filter then
+    return false
+  end
   local name = type(filter) == "string" and filter or filter.name
   return name == block_filter_item()
 end
@@ -133,7 +133,7 @@ local function sanitize_saved_priorities()
   local fresh = {}
 
   for _, surface in pairs(game.surfaces) do
-    for _, splitter in pairs(surface.find_entities_filtered{type = "splitter"}) do
+    for _, splitter in pairs(surface.find_entities_filtered({ type = "splitter" })) do
       if has_block_filter(splitter) then
         local saved = old[splitter.unit_number]
         if type(saved) == "table" then

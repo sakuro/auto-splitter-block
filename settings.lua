@@ -1,4 +1,4 @@
-local filter_item_allowed_values = {"no-item", "deconstruction-planner"}
+local filter_item_allowed_values = { "no-item", "deconstruction-planner" }
 
 if mods["atan-null"] then
   table.insert(filter_item_allowed_values, "atan-null")
