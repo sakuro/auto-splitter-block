@@ -27,6 +27,9 @@ local function get_output_positions(splitter)
   return left_pos, right_pos
 end
 
+--- True when a red or green circuit wire is connected to the splitter.
+---@param splitter LuaEntity
+---@return boolean
 local function is_circuit_controlled(splitter)
   return splitter.get_circuit_network(defines.wire_type.red) ~= nil
     or splitter.get_circuit_network(defines.wire_type.green) ~= nil
@@ -61,6 +64,12 @@ local function get_tile_positions(entity)
   return { { x = pos.x, y = pos.y } }
 end
 
+--- Finds the splitters whose left or right output tile the entity occupies.
+---
+--- Placing or removing such an entity changes which of those splitters' outputs
+--- are connected, so each needs its block filter re-evaluated.
+---@param entity LuaEntity  a splitter itself is excluded from the result
+---@return LuaEntity[]
 local function find_affecting_splitters(entity)
   local pos = entity.position
   local tile_positions = get_tile_positions(entity)
@@ -83,6 +92,9 @@ local function find_affecting_splitters(entity)
   return result
 end
 
+--- True when the splitter's filter is this MOD's block filter item.
+---@param splitter LuaEntity
+---@return boolean
 local function has_block_filter(splitter)
   local filter = splitter.splitter_filter
   if not filter then
@@ -108,6 +120,8 @@ local function set_block_filter(splitter, side)
   splitter.splitter_output_priority = side
 end
 
+--- Removes the block filter and restores the output priority saved when it was set.
+---@param splitter LuaEntity
 local function clear_block_filter(splitter)
   local id = splitter.unit_number
   local saved = storage.saved_priorities[id]
@@ -118,6 +132,8 @@ local function clear_block_filter(splitter)
   splitter.splitter_output_priority = type(saved) == "string" and saved or "none"
 end
 
+--- Forgets the saved output priority of a splitter that no longer exists.
+---@param unit_number uint  from on_object_destroyed, since the splitter is already gone
 local function discard_saved_priority(unit_number)
   storage.saved_priorities[unit_number] = nil
 end
@@ -150,6 +166,13 @@ local function sanitize_saved_priorities()
   storage.saved_priorities = fresh
 end
 
+--- Sets or clears the block filter to match which output sides are connected.
+---
+--- With exactly one side connected, the filter sends every item to that side.
+--- With both or neither connected, a block filter this MOD set is cleared. A
+--- filter the player set is never touched.
+---@param splitter LuaEntity
+---@param exclude_entity LuaEntity|nil  treated as absent; the entity being removed
 local function update_block_filter(splitter, exclude_entity)
   local surface = splitter.surface
   local dir = splitter.direction
