@@ -107,11 +107,11 @@ end
 local function set_block_filter(splitter, side)
   local id = splitter.unit_number
   -- Save the user's priority so clear_block_filter can restore it. Keyed by
-  -- unit_number and kept until the matching clear -- a block and its clear are
-  -- usually ticks or minutes apart, whenever the other output side gets
-  -- (dis)connected. register_on_object_destroyed lets the engine tell us when
-  -- the splitter is gone so the entry cannot leak (biters, explosions, script
-  -- removal -- the mining events do not cover those).
+  -- unit_number and kept until the matching clear, which comes ticks or minutes
+  -- later when the other output side is connected or disconnected.
+  -- register_on_object_destroyed has the engine report the splitter's removal so
+  -- the entry cannot leak; the mining events do not cover biters, explosions or
+  -- script removal.
   if storage.saved_priorities[id] == nil then
     storage.saved_priorities[id] = splitter.splitter_output_priority
     script.register_on_object_destroyed(splitter)

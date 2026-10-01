@@ -41,8 +41,8 @@ end
 
 --- Change what `settings.startup["auto-splitter-block-filter-item"]` reports.
 --- `lib/splitter_utils.lua` reads it lazily, so a change takes effect on the
---- next call -- set it before the `update_block_filter` / `has_block_filter`
---- under test.
+--- next call. Set it before calling the `update_block_filter` /
+--- `has_block_filter` under test.
 function factorio.set_filter_item(name)
   filter_item = name
 end
@@ -105,7 +105,7 @@ local function type_matches(entity_type, query_type)
 end
 
 --- A surface whose find_entities_filtered searches `opts.entities` (a table you
---- may keep mutating -- the search reads it live).
+--- may keep mutating, since the search reads it live).
 function factorio.surface(opts)
   opts = opts or {}
   local entities = opts.entities or {}
