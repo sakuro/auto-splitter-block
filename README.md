@@ -23,9 +23,9 @@ Additional options with optional MODs:
 
 ## Automated Builds
 
-Entities built by construction robots or space platforms are ignored by default, to avoid overwriting filters set by blueprints (e.g. balancer designs). Space platforms have no manual placement — all platform construction goes through this same automated path, so enabling this is the only way to get auto-blocking working there.
+Entities built by construction robots or space platforms are ignored by default, to avoid overwriting filters set by blueprints (e.g. balancer designs). Space platforms have no manual placement: all platform construction goes through this automated path, so enabling the setting is the only way to get auto-blocking there.
 
-Enable "Enable for automated builds" in MOD Settings > Map when needed, and turn it back off afterward. It's a single value shared by the whole force, not a quick toggle button, because flipping it also affects any other robot construction in progress elsewhere on the map.
+Enable "Enable for automated builds" in MOD Settings > Map when needed, and turn it back off afterward. It is a single value shared by the whole force, so flipping it also affects any other robot construction in progress elsewhere on the map.
 
 ## Compatible Transport Entities
 
