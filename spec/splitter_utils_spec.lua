@@ -259,43 +259,6 @@ describe("splitter_utils.update_block_filter", function()
     assert.equal("right", splitter.splitter_output_priority)
   end)
 
-  it("sees a same-direction 2x1 splitter whose body covers the left output tile", function()
-    local w = factorio.world()
-    local splitter = north_splitter(w, { priority = "left" })
-    -- North splitter at {-1,-1}: its 2x1 body covers {-0.5,-1} (the left output)
-    -- but not {0.5,-1} (the right one). Its centre sits on the tile edge, so a
-    -- centre-only match would miss it.
-    w.add(factorio.splitter({ position = { x = -1, y = -1 }, direction = D.north, surface = w.surface }))
-
-    splitter_utils.update_block_filter(splitter)
-
-    assert.equal("no-item", splitter.splitter_filter)
-    assert.equal("right", splitter.splitter_output_priority)
-    assert.equal("left", storage.saved_priorities[splitter.unit_number])
-  end)
-
-  it("sees a 2x1 loader whose body covers an output tile", function()
-    local w = factorio.world()
-    local splitter = north_splitter(w)
-    -- North loader at {-0.5,-1.5}: 2 tiles long in y, so its body reaches the
-    -- left output tile {-0.5,-1} while its centre sits a tile away.
-    w.add(factorio.loader({ position = { x = -0.5, y = -1.5 }, direction = D.north, surface = w.surface }))
-
-    splitter_utils.update_block_filter(splitter)
-
-    assert.equal("right", splitter.splitter_output_priority)
-  end)
-
-  it("ignores a 2x1 splitter that covers the output tile but faces another direction", function()
-    local w = factorio.world()
-    local splitter = north_splitter(w)
-    w.add(factorio.splitter({ position = { x = -1, y = -1 }, direction = D.south, surface = w.surface }))
-
-    splitter_utils.update_block_filter(splitter)
-
-    assert.is_nil(splitter.splitter_filter)
-  end)
-
   it("uses the configured filter item", function()
     factorio.set_filter_item("deconstruction-planner")
     local w = factorio.world()
@@ -477,35 +440,75 @@ describe("splitter_utils.update_block_filter", function()
     assert.equal("right", splitter.splitter_output_priority)
     assert.is_nil(storage.saved_priorities[splitter.unit_number])
   end)
+end)
 
-  it("counts an underground-belt output that side-loads the output tile", function()
-    local w = factorio.world()
-    local splitter = north_splitter(w)
-    w.add(factorio.underground_belt({
-      position = { x = -0.5, y = -1 },
-      belt_to_ground_type = "output",
-      direction = D.east,
-    }))
+-- Each candidate sits on the left output tile {-0.5,-1} of a north splitter at
+-- {0,0}; 2x1 ones are placed so their body covers that tile and not the right
+-- one. Expectations follow belt_neighbours as measured in Factorio 2.1 (#92).
+describe("splitter_utils.update_block_filter connectivity", function()
+  before_each(factorio.reset)
 
-    splitter_utils.update_block_filter(splitter)
+  local function with(make, extra)
+    return function(opts)
+      for k, v in pairs(extra) do
+        opts[k] = v
+      end
+      return make(opts)
+    end
+  end
+  local belt = factorio.belt
+  local ug_input = factorio.underground_belt
+  local ug_output = with(factorio.underground_belt, { belt_to_ground_type = "output" })
+  local splitter = factorio.splitter
+  local loader_input = factorio.loader
+  local loader_output = with(factorio.loader, { loader_type = "output" })
+  local loader_1x1_input = with(factorio.loader, { type = "loader-1x1" })
+  local loader_1x1_output = with(factorio.loader, { type = "loader-1x1", loader_type = "output" })
 
-    assert.equal("no-item", splitter.splitter_filter)
-    assert.equal("right", splitter.splitter_output_priority)
-  end)
+  local ON_TILE = { x = -0.5, y = -1 }
+  local NORTH_2X1 = { x = -1, y = -1 } -- splitter body spanning x
+  local NORTH_LOADER = { x = -0.5, y = -1.5 } -- loader body spanning y
+  local WEST_LOADER = { x = -1, y = -1 } -- loader body spanning x
 
-  it("ignores an underground-belt output pointing the splitter's own way", function()
-    local w = factorio.world()
-    local splitter = north_splitter(w)
-    w.add(factorio.underground_belt({
-      position = { x = -0.5, y = -1 },
-      belt_to_ground_type = "output",
-      direction = D.north,
-    }))
-    w.add(aligned_belt(0.5, -1))
+  local cases = {
+    { "transport-belt", belt, ON_TILE, D.north, true },
+    { "transport-belt", belt, ON_TILE, D.east, true },
+    { "transport-belt", belt, ON_TILE, D.south, false },
+    { "transport-belt", belt, ON_TILE, D.west, true },
+    { "underground-belt input", ug_input, ON_TILE, D.north, true },
+    { "underground-belt input", ug_input, ON_TILE, D.east, true },
+    { "underground-belt input", ug_input, ON_TILE, D.south, false },
+    { "underground-belt input", ug_input, ON_TILE, D.west, true },
+    { "underground-belt output", ug_output, ON_TILE, D.north, false },
+    { "underground-belt output", ug_output, ON_TILE, D.east, true },
+    { "underground-belt output", ug_output, ON_TILE, D.south, false },
+    { "underground-belt output", ug_output, ON_TILE, D.west, true },
+    { "splitter", splitter, NORTH_2X1, D.north, true },
+    { "splitter", splitter, NORTH_2X1, D.south, false },
+    { "loader input", loader_input, NORTH_LOADER, D.north, true },
+    { "loader input", loader_input, WEST_LOADER, D.west, false },
+    { "loader output", loader_output, NORTH_LOADER, D.north, false },
+    { "loader output", loader_output, WEST_LOADER, D.west, false },
+    { "loader-1x1 input", loader_1x1_input, ON_TILE, D.north, true },
+    { "loader-1x1 output", loader_1x1_output, ON_TILE, D.north, false },
+  }
 
-    splitter_utils.update_block_filter(splitter)
+  for _, case in ipairs(cases) do
+    local label, make, at, dir, connected = case[1], case[2], case[3], case[4], case[5]
+    local verb = connected and "counts" or "ignores"
+    it(verb .. " a " .. label .. " facing direction " .. dir .. " on the left output", function()
+      local w = factorio.world()
+      local target = w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = D.north }))
+      w.add(make({ position = at, direction = dir }))
 
-    assert.equal("no-item", splitter.splitter_filter)
-    assert.equal("left", splitter.splitter_output_priority)
-  end)
+      splitter_utils.update_block_filter(target)
+
+      if connected then
+        assert.equal("no-item", target.splitter_filter)
+        assert.equal("right", target.splitter_output_priority)
+      else
+        assert.is_nil(target.splitter_filter)
+      end
+    end)
+  end
 end)

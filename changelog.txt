@@ -2,6 +2,7 @@
 Version: Unreleased
   Bugfixes:
     - Fix splitters not updating their block filter when a loader is placed at or removed from an output
+    - Fix a loader that unloads onto belts being treated as connected when placed at a splitter output; that side is now blocked
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.0
 Date: 2026-09-10

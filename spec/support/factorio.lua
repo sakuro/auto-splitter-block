@@ -159,12 +159,53 @@ function factorio.world()
   }
 end
 
+-- Engine connection rules, as measured in Factorio 2.1 by reading
+-- belt_neighbours.outputs of a splitter with each candidate on an output tile.
+-- Only the fake encodes them; the MOD asks the engine.
+local function receives_from_splitter(e, splitter_dir)
+  local opposite = (splitter_dir + 8) % 16
+  if e.type == "transport-belt" then
+    return e.direction ~= opposite
+  elseif e.type == "underground-belt" then
+    if e.belt_to_ground_type == "output" then
+      return e.direction ~= opposite and e.direction ~= splitter_dir
+    end
+    return e.direction ~= opposite
+  elseif e.type == "splitter" then
+    return e.direction == splitter_dir
+  elseif e.type == "loader" or e.type == "loader-1x1" then
+    return e.loader_type == "input" and e.direction == splitter_dir
+  end
+  return false
+end
+
+local FORWARD = { [0] = { 0, -1 }, [4] = { 1, 0 }, [8] = { 0, 1 }, [12] = { -1, 0 } }
+
+-- Computed on each read so it tracks entities added to or removed from the world.
+-- An entity covering both output tiles appears once per tile.
+local function belt_neighbours(splitter)
+  local fx, fy = FORWARD[splitter.direction][1], FORWARD[splitter.direction][2]
+  local outputs = {}
+  for _, side in ipairs({ -0.5, 0.5 }) do
+    local tile = {
+      x = splitter.position.x + fx - fy * side,
+      y = splitter.position.y + fy + fx * side,
+    }
+    for _, e in ipairs(splitter.surface.find_entities_filtered({ position = tile })) do
+      if e ~= splitter and receives_from_splitter(e, splitter.direction) then
+        outputs[#outputs + 1] = e
+      end
+    end
+  end
+  return { inputs = {}, outputs = outputs }
+end
+
 --- A fake splitter usable with lib/splitter_utils.lua.
 function factorio.splitter(opts)
   opts = opts or {}
   next_unit_number = next_unit_number + 1
   local circuit = opts.circuit
-  return {
+  local splitter = {
     valid = true,
     type = opts.type or "splitter",
     unit_number = opts.unit_number or next_unit_number,
@@ -183,6 +224,13 @@ function factorio.splitter(opts)
       return nil
     end,
   }
+  return setmetatable(splitter, {
+    __index = function(self, key)
+      if key == "belt_neighbours" then
+        return belt_neighbours(self)
+      end
+    end,
+  })
 end
 
 --- A fake 1x1 transport belt. `surface` is needed when the belt is the argument
@@ -208,11 +256,13 @@ function factorio.underground_belt(opts)
   return belt
 end
 
---- A fake 2x1 loader. Two tiles along its direction; used to exercise
---- bounding-box matching in find_entities_filtered{position=}.
+--- A fake loader, 2x1 unless `opts.type` is "loader-1x1". `loader_type` is
+--- "input" (default) or "output".
 function factorio.loader(opts)
+  opts = opts or {}
   local loader = factorio.belt(opts)
-  loader.type = "loader"
+  loader.type = opts.type or "loader"
+  loader.loader_type = opts.loader_type or "input"
   return loader
 end
 
