@@ -116,6 +116,17 @@ describe("splitter_utils.find_affecting_splitters", function()
       assert.equal(splitter, result[1])
     end)
   end
+
+  it("matches a lane splitter on an output tile", function()
+    local w = factorio.world()
+    local splitter = w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = D.north }))
+    local lane_splitter = factorio.belt({ type = "lane-splitter", position = { x = 0.5, y = -1 }, surface = w.surface })
+
+    local result = splitter_utils.find_affecting_splitters(lane_splitter)
+
+    assert.equal(1, #result)
+    assert.equal(splitter, result[1])
+  end)
 end)
 
 describe("splitter_utils.has_block_filter", function()
@@ -444,7 +455,7 @@ end)
 
 -- Each candidate sits on the left output tile {-0.5,-1} of a north splitter at
 -- {0,0}; 2x1 ones are placed so their body covers that tile and not the right
--- one. Expectations follow belt_neighbours as measured in Factorio 2.1 (#92).
+-- one. Expectations follow belt_neighbours as measured in Factorio 2.1 (#92, #93).
 describe("splitter_utils.update_block_filter connectivity", function()
   before_each(factorio.reset)
 
@@ -464,6 +475,7 @@ describe("splitter_utils.update_block_filter connectivity", function()
   local loader_output = with(factorio.loader, { loader_type = "output" })
   local loader_1x1_input = with(factorio.loader, { type = "loader-1x1" })
   local loader_1x1_output = with(factorio.loader, { type = "loader-1x1", loader_type = "output" })
+  local lane_splitter = with(factorio.belt, { type = "lane-splitter" })
 
   local ON_TILE = { x = -0.5, y = -1 }
   local NORTH_2X1 = { x = -1, y = -1 } -- splitter body spanning x
@@ -491,6 +503,10 @@ describe("splitter_utils.update_block_filter connectivity", function()
     { "loader output", loader_output, WEST_LOADER, D.west, false },
     { "loader-1x1 input", loader_1x1_input, ON_TILE, D.north, true },
     { "loader-1x1 output", loader_1x1_output, ON_TILE, D.north, false },
+    { "lane-splitter", lane_splitter, ON_TILE, D.north, true },
+    { "lane-splitter", lane_splitter, ON_TILE, D.east, false },
+    { "lane-splitter", lane_splitter, ON_TILE, D.south, false },
+    { "lane-splitter", lane_splitter, ON_TILE, D.west, false },
   }
 
   for _, case in ipairs(cases) do

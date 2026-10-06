@@ -171,7 +171,7 @@ local function receives_from_splitter(e, splitter_dir)
       return e.direction ~= opposite and e.direction ~= splitter_dir
     end
     return e.direction ~= opposite
-  elseif e.type == "splitter" then
+  elseif e.type == "splitter" or e.type == "lane-splitter" then
     return e.direction == splitter_dir
   elseif e.type == "loader" or e.type == "loader-1x1" then
     return e.loader_type == "input" and e.direction == splitter_dir
