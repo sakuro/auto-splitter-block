@@ -49,13 +49,16 @@ local function has_compatible_entity_at(surface, position, splitter_dir, exclude
   return false
 end
 
--- 1x1 entities: single position. 2x1 entities (splitter, loader): two positions.
+-- A splitter is 2 tiles wide across its facing direction; a loader is 2 tiles
+-- long along it. Everything else handled here is 1x1.
 local function get_tile_positions(entity)
   local pos = entity.position
   local etype = entity.type
   if etype == "splitter" or etype == "loader" then
     local dir = entity.direction
-    if dir == defines.direction.north or dir == defines.direction.south then
+    local vertical = dir == defines.direction.north or dir == defines.direction.south
+    local spans_x = (etype == "splitter") == vertical
+    if spans_x then
       return { { x = pos.x - 0.5, y = pos.y }, { x = pos.x + 0.5, y = pos.y } }
     else
       return { { x = pos.x, y = pos.y - 0.5 }, { x = pos.x, y = pos.y + 0.5 } }

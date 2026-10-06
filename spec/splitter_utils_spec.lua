@@ -94,6 +94,28 @@ describe("splitter_utils.find_affecting_splitters", function()
     assert.equal(1, #result)
     assert.equal(a, result[1])
   end)
+
+  -- A loader is 2 tiles long along its facing direction, so one facing the
+  -- splitter's way covers the output tile with its back half.
+  local loader_on_left_output = {
+    { dir = D.north, at = { x = -0.5, y = -1.5 } },
+    { dir = D.east, at = { x = 1.5, y = -0.5 } },
+    { dir = D.south, at = { x = 0.5, y = 1.5 } },
+    { dir = D.west, at = { x = -1.5, y = 0.5 } },
+  }
+
+  for _, case in ipairs(loader_on_left_output) do
+    it("matches a loader covering the left output tile for direction " .. case.dir, function()
+      local w = factorio.world()
+      local splitter = w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = case.dir }))
+      local loader = factorio.loader({ position = case.at, direction = case.dir, surface = w.surface })
+
+      local result = splitter_utils.find_affecting_splitters(loader)
+
+      assert.equal(1, #result)
+      assert.equal(splitter, result[1])
+    end)
+  end
 end)
 
 describe("splitter_utils.has_block_filter", function()
