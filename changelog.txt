@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
-Version: Unreleased
+Version: 0.9.1
+Date: 2026-10-06
   Locale:
     - Warn in the block filter item setting description about items from other mods in blueprints and about changing the setting mid-game
 ---------------------------------------------------------------------------------------------------
