@@ -33,5 +33,6 @@ Enable "Enable for automated builds" in MOD Settings > Map when needed, and turn
 - Underground belts (inputs: same rules as transport belts; outputs: sideloading only)
 - Splitters (same direction only)
 - Loaders (same direction only; not loaders that take items out of a container)
+- Lane splitters (same direction only)
 
 All tiers are supported.

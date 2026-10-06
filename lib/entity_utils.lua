@@ -4,9 +4,10 @@ local ALL_TRANSPORT_TYPES = {
   ["splitter"] = true,
   ["loader"] = true,
   ["loader-1x1"] = true,
+  ["lane-splitter"] = true,
 }
 
---- True when the entity is a belt, underground belt, splitter, or loader.
+--- True when the entity is a belt, underground belt, splitter, loader, or lane splitter.
 ---@param entity LuaEntity
 ---@return boolean
 local function is_transport_entity(entity)
