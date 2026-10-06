@@ -1,5 +1,3 @@
-local entity_utils = require("lib.entity_utils")
-
 -- Read lazily rather than caching at require time: the value is a startup
 -- setting (fixed for a session) so it costs nothing in practice, and specs can
 -- vary it per case.
@@ -35,20 +33,6 @@ local function is_circuit_controlled(splitter)
     or splitter.get_circuit_network(defines.wire_type.green) ~= nil
 end
 
--- exclude_entity: entity to ignore (used during removal events)
-local function has_compatible_entity_at(surface, position, splitter_dir, exclude_entity)
-  local entities = surface.find_entities_filtered({
-    position = position,
-    type = { "transport-belt", "underground-belt", "splitter", "loader", "loader-1x1" },
-  })
-  for _, entity in ipairs(entities) do
-    if entity ~= exclude_entity and entity_utils.is_output_compatible(entity, splitter_dir) then
-      return true
-    end
-  end
-  return false
-end
-
 -- A splitter is 2 tiles wide across its facing direction; a loader is 2 tiles
 -- long along it. Everything else handled here is 1x1.
 local function get_tile_positions(entity)
@@ -65,6 +49,27 @@ local function get_tile_positions(entity)
     end
   end
   return { { x = pos.x, y = pos.y } }
+end
+
+-- Asks the engine which entities the splitter feeds rather than re-deriving
+-- per-type direction rules, then maps each one back to the output tile it
+-- occupies to tell the left side from the right.
+-- exclude_entity is skipped: the mined events fire while it is still in place.
+local function connected_sides(splitter, exclude_entity)
+  local left_pos, right_pos = get_output_positions(splitter)
+  local has_left, has_right = false, false
+  for _, neighbour in ipairs(splitter.belt_neighbours.outputs) do
+    if neighbour ~= exclude_entity then
+      for _, tile_pos in ipairs(get_tile_positions(neighbour)) do
+        if positions_match(tile_pos, left_pos) then
+          has_left = true
+        elseif positions_match(tile_pos, right_pos) then
+          has_right = true
+        end
+      end
+    end
+  end
+  return has_left, has_right
 end
 
 --- Finds the splitters whose left or right output tile the entity occupies.
@@ -177,12 +182,7 @@ end
 ---@param splitter LuaEntity
 ---@param exclude_entity LuaEntity|nil  treated as absent; the entity being removed
 local function update_block_filter(splitter, exclude_entity)
-  local surface = splitter.surface
-  local dir = splitter.direction
-  local left_pos, right_pos = get_output_positions(splitter)
-
-  local has_left = has_compatible_entity_at(surface, left_pos, dir, exclude_entity)
-  local has_right = has_compatible_entity_at(surface, right_pos, dir, exclude_entity)
+  local has_left, has_right = connected_sides(splitter, exclude_entity)
 
   if has_left == has_right and has_block_filter(splitter) then
     clear_block_filter(splitter)
