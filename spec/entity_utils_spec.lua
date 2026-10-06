@@ -2,7 +2,15 @@ local entity_utils = require("lib.entity_utils")
 
 describe("entity_utils.is_transport_entity", function()
   it("is true for every transport type", function()
-    for _, t in ipairs({ "transport-belt", "underground-belt", "splitter", "loader", "loader-1x1", "lane-splitter" }) do
+    for _, t in ipairs({
+      "transport-belt",
+      "underground-belt",
+      "splitter",
+      "loader",
+      "loader-1x1",
+      "lane-splitter",
+      "linked-belt",
+    }) do
       assert.is_true(entity_utils.is_transport_entity({ type = t }))
     end
   end)

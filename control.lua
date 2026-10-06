@@ -105,6 +105,7 @@ local ENTITY_FILTER = {
   { filter = "type", type = "loader" },
   { filter = "type", type = "loader-1x1" },
   { filter = "type", type = "lane-splitter" },
+  { filter = "type", type = "linked-belt" },
 }
 
 script.on_event(defines.events.on_built_entity, on_entity_built, ENTITY_FILTER)
