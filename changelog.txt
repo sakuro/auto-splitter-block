@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------------------------------------
+Version: Unreleased
+  Bugfixes:
+    - Fix splitters not updating their block filter when a loader is placed at or removed from an output
+---------------------------------------------------------------------------------------------------
 Version: 0.8.0
 Date: 2026-09-10
   Features:
