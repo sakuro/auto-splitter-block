@@ -127,6 +127,17 @@ describe("splitter_utils.find_affecting_splitters", function()
     assert.equal(1, #result)
     assert.equal(splitter, result[1])
   end)
+
+  it("matches a linked belt on an output tile", function()
+    local w = factorio.world()
+    local splitter = w.add(factorio.splitter({ position = { x = 0, y = 0 }, direction = D.north }))
+    local linked_belt = factorio.linked_belt({ position = { x = 0.5, y = -1 }, surface = w.surface })
+
+    local result = splitter_utils.find_affecting_splitters(linked_belt)
+
+    assert.equal(1, #result)
+    assert.equal(splitter, result[1])
+  end)
 end)
 
 describe("splitter_utils.has_block_filter", function()
@@ -455,7 +466,7 @@ end)
 
 -- Each candidate sits on the left output tile {-0.5,-1} of a north splitter at
 -- {0,0}; 2x1 ones are placed so their body covers that tile and not the right
--- one. Expectations follow belt_neighbours as measured in Factorio 2.1 (#92, #93).
+-- one. Expectations follow belt_neighbours as measured in Factorio 2.1 (#92, #93, #94).
 describe("splitter_utils.update_block_filter connectivity", function()
   before_each(factorio.reset)
 
@@ -476,6 +487,8 @@ describe("splitter_utils.update_block_filter connectivity", function()
   local loader_1x1_input = with(factorio.loader, { type = "loader-1x1" })
   local loader_1x1_output = with(factorio.loader, { type = "loader-1x1", loader_type = "output" })
   local lane_splitter = with(factorio.belt, { type = "lane-splitter" })
+  local linked_input = factorio.linked_belt
+  local linked_output = with(factorio.linked_belt, { linked_belt_type = "output" })
 
   local ON_TILE = { x = -0.5, y = -1 }
   local NORTH_2X1 = { x = -1, y = -1 } -- splitter body spanning x
@@ -507,6 +520,14 @@ describe("splitter_utils.update_block_filter connectivity", function()
     { "lane-splitter", lane_splitter, ON_TILE, D.east, false },
     { "lane-splitter", lane_splitter, ON_TILE, D.south, false },
     { "lane-splitter", lane_splitter, ON_TILE, D.west, false },
+    { "linked-belt input", linked_input, ON_TILE, D.north, true },
+    { "linked-belt input", linked_input, ON_TILE, D.east, false },
+    { "linked-belt input", linked_input, ON_TILE, D.south, false },
+    { "linked-belt input", linked_input, ON_TILE, D.west, false },
+    { "linked-belt output", linked_output, ON_TILE, D.north, false },
+    { "linked-belt output", linked_output, ON_TILE, D.east, false },
+    { "linked-belt output", linked_output, ON_TILE, D.south, false },
+    { "linked-belt output", linked_output, ON_TILE, D.west, false },
   }
 
   for _, case in ipairs(cases) do

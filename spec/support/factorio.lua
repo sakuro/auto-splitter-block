@@ -175,6 +175,8 @@ local function receives_from_splitter(e, splitter_dir)
     return e.direction == splitter_dir
   elseif e.type == "loader" or e.type == "loader-1x1" then
     return e.loader_type == "input" and e.direction == splitter_dir
+  elseif e.type == "linked-belt" then
+    return e.linked_belt_type == "input" and e.direction == splitter_dir
   end
   return false
 end
@@ -253,6 +255,15 @@ function factorio.underground_belt(opts)
   local belt = factorio.belt(opts)
   belt.type = "underground-belt"
   belt.belt_to_ground_type = opts.belt_to_ground_type or "input"
+  return belt
+end
+
+--- A fake linked belt. `linked_belt_type` is "input" (default) or "output".
+function factorio.linked_belt(opts)
+  opts = opts or {}
+  local belt = factorio.belt(opts)
+  belt.type = "linked-belt"
+  belt.linked_belt_type = opts.linked_belt_type or "input"
   return belt
 end
 

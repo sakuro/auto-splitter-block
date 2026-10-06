@@ -34,5 +34,6 @@ Enable "Enable for automated builds" in MOD Settings > Map when needed, and turn
 - Splitters (same direction only)
 - Loaders (same direction only; not loaders that take items out of a container)
 - Lane splitters (same direction only)
+- Linked belts (input side only, same direction only)
 
 All tiers are supported.
