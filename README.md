@@ -14,18 +14,11 @@ A Factorio MOD that automatically sets splitter output filters to block the unus
 
 ## Block Filter Item
 
-The item used for blocking is configurable in MOD settings (startup). Default: No item.
-
-Additional options with optional MODs:
-
-- [Null Item](https://mods.factorio.com/mod/atan-null)
-- [Null](https://mods.factorio.com/mod/null) (listed as "Null Item/Entity" on the MOD portal)
+The item used for blocking is configurable in MOD settings (startup): No item (default) or Deconstruction planner. When installed, [Null Item](https://mods.factorio.com/mod/atan-null) and [Null](https://mods.factorio.com/mod/null) add their items to the choices.
 
 ## Automated Builds
 
-Entities built by construction robots or space platforms are ignored by default, to avoid overwriting filters set by blueprints (e.g. balancer designs). Space platforms have no manual placement: all platform construction goes through this automated path, so enabling the setting is the only way to get auto-blocking there.
-
-Enable "Enable for automated builds" in MOD Settings > Map when needed, and turn it back off afterward. It is a single value shared by the whole force, so flipping it also affects any other robot construction in progress elsewhere on the map.
+Entities built by construction robots or space platforms are ignored by default, to avoid overwriting filters set by blueprints. To auto-block on space platforms, enable "Enable for automated builds" in MOD Settings > Map; it applies to all robot construction on the map while enabled.
 
 ## Compatible Transport Entities
 
