@@ -14,7 +14,7 @@ A Factorio MOD that automatically sets splitter output filters to block the unus
 
 ## Block Filter Item
 
-The item used for blocking is configurable in MOD settings (startup). [Null Item](https://mods.factorio.com/mod/atan-null) and [Null](https://mods.factorio.com/mod/null) add more choices.
+The item used for blocking is configurable in MOD settings (startup): No item (default) or Deconstruction planner. When installed, [Null Item](https://mods.factorio.com/mod/atan-null) and [Null](https://mods.factorio.com/mod/null) add their items to the choices.
 
 ## Automated Builds
 
